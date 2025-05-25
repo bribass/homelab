@@ -6,8 +6,8 @@ This repository contains configuration and maintenance scripts for my homelab.
 
 The lab system is centralized on a single host, with the following components:
 
-|  | Component |
-| --------- | -----|
+|   | Component |
+| - | --------- |
 | Motherboard/CPU | [Minisforum BD795i SE](https://www.amazon.com/dp/B0DQ8WXMKP) with AMD Ryzen 9 7945HX |
 | RAM | 64GB |
 | Case | [Jonsbo N3](https://www.amazon.com/dp/B0CMVBMVHT) |
