@@ -1,0 +1,27 @@
+- name: Create vars for installing package files from GitHub
+  set_fact: url="https://github.com/{{ github.github_project }}/releases/download/v{{ github.release }}/{{ github.package_name }}_{{ github.release }}{{ github.suffix }}" deb_file="{{ github.package_name }}_{{ github.release }}{{ github.suffix }}"
+
+- name: Create local cache directory for package files
+  file:
+    path: "{{ cache_dir }}"
+    state: directory
+    mode: "0755"
+
+- name: Check if {{ github.package_name }} is installed
+  command: dpkg-query --show "{{ github.package_name }}"
+  register: install_deb_gh_check
+  failed_when: install_deb_gh_check.rc > 1
+  changed_when: install_deb_gh_check.rc == 1
+
+- name: Download {{ github.package_name }} package to cache
+  get_url:
+    url: "{{ url }}"
+    dest: "{{ cache_dir }}/{{ deb_file }}"
+  when: install_deb_gh_check.rc == 1
+
+- name: Install {{ github.package_name }} package
+  become: true
+  apt:
+    deb: "{{ cache_dir }}/{{ deb_file }}"
+  when: install_deb_gh_check.rc == 1
+

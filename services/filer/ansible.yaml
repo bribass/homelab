@@ -1,0 +1,41 @@
+- hosts: filer
+  tasks:
+  - name: Install Cockpit from Debian
+    become: yes
+    ansible.builtin.apt:
+      update_cache: true
+      install_recommends: false
+      name: cockpit
+      state: present
+
+  - name: Install Cockpit extensions from GitHub
+    include_role: 
+      name: install.deb_from_github
+    vars:
+      github: "{{ item.value }}"
+    with_dict: "{{ versions }}"
+
+  - name: Configure sudoers for admin users
+    community.general.sudoers:
+      name: admin-users
+      user: brian
+      commands: ALL
+
+  vars:
+    versions:
+      cockpit_file_sharing:
+        github_project: "45Drives/cockpit-file-sharing"
+        release: 4.2.10-3
+        package_name: "cockpit-file-sharing"
+        suffix: "focal_all.deb"
+      cockpit_navigator:
+        github_project: "45Drives/cockpit-navigator"
+        release: 0.5.10
+        package_name: "cockpit-navigator"
+        suffix: "-1focal_all.deb"
+      cockpit_identities:
+        github_project: "45Drives/cockpit-identities"
+        release: 0.1.12
+        package_name: "cockpit-identities"
+        suffix: "-1focal_all.deb"
+
