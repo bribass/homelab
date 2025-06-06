@@ -3,7 +3,8 @@
 | | |
 |-|-|
 | **Proxmox ID** | CT 100 |
-| **IP Address** | 10.1.1.9 |
+| **LXC Base Template** | `debian-12-standard` |
+| **IP Address** | 10.1.1.10 |
 
 This container is intended to act as a file server, while taking advantage of the ZFS pool managed by the Proxmox host (in lieu of PMS's solution of [mergerfs](https://perfectmediaserver.com/03-installation/manual-install-proxmox/#mergerfs) and [SnapRAID](https://perfectmediaserver.com/03-installation/manual-install-proxmox/#snapraid)).  Because Proxmox is managing the ZFS pool on the hard disks, solutions that pass full hard drive devices to a VM running something like TrueNAS or OpenMediaVault are contraindicated.
 
