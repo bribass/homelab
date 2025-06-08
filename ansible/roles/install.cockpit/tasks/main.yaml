@@ -1,0 +1,15 @@
+- name: Install Cockpit from Debian
+  become: yes
+  ansible.builtin.apt:
+    update_cache: true
+    install_recommends: false
+    name: cockpit
+    state: present
+  when: ansible_distribution == "Debian"
+
+- name: Configure cockpit for root user
+  ansible.builtin.lineinfile:
+    path: /etc/cockpit/disallowed-users
+    state: absent
+    regexp: '^#?root'
+

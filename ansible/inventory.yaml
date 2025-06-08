@@ -11,4 +11,5 @@ all:
         proxmox_lxc:
           hosts:
             filer:
+            auth:
 

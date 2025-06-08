@@ -1,12 +1,7 @@
 - hosts: filer
   tasks:
-  - name: Install Cockpit from Debian
-    become: yes
-    ansible.builtin.apt:
-      update_cache: true
-      install_recommends: false
-      name: cockpit
-      state: present
+  - import_role:
+      name: install.cockpit
 
   - name: Install Cockpit extensions from GitHub
     include_role: 

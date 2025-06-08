@@ -1,0 +1,71 @@
+version: 1
+
+# entry-id: 1
+dn: dc=h,dc=bbassett,dc=net
+objectClass: top
+objectClass: domain
+dc: h
+creatorsName: cn=Directory Manager
+modifiersName: cn=Directory Manager
+createTimestamp: 20250608012625Z
+modifyTimestamp: 20250608012625Z
+nsUniqueId: 7791f781-440711f0-93b0fef6-cb89a0f5
+entryUUID: 9988244a-584c-4012-82e8-628b19231d9f
+dsEntryDN: dc=h,dc=bbassett,dc=net
+
+# entry-id: 2
+dn: ou=Users,dc=h,dc=bbassett,dc=net
+objectClass: top
+objectClass: organizationalUnit
+ou: Users
+creatorsName: cn=Directory Manager
+modifiersName: cn=Directory Manager
+createTimestamp: 20250608013340Z
+modifyTimestamp: 20250608013340Z
+nsUniqueId: 95ac2781-440811f0-93b0fef6-cb89a0f5
+entryUUID: 0ed63629-19ad-417e-ab87-49155190396f
+dsEntryDN: ou=Users,dc=h,dc=bbassett,dc=net
+
+# entry-id: 3
+dn: ou=Groups,dc=h,dc=bbassett,dc=net
+objectClass: top
+objectClass: organizationalUnit
+ou: Groups
+creatorsName: cn=Directory Manager
+modifiersName: cn=Directory Manager
+createTimestamp: 20250608013414Z
+modifyTimestamp: 20250608013414Z
+nsUniqueId: 95ac2782-440811f0-93b0fef6-cb89a0f5
+entryUUID: 72101664-cb16-4300-862e-48b38fd504fe
+dsEntryDN: ou=Groups,dc=h,dc=bbassett,dc=net
+
+# entry-id: 4
+dn: ou=Service Accounts,dc=h,dc=bbassett,dc=net
+objectClass: top
+objectClass: organizationalUnit
+ou: Service Accounts
+creatorsName: cn=Directory Manager
+modifiersName: cn=Directory Manager
+createTimestamp: 20250608021957Z
+modifyTimestamp: 20250608021957Z
+nsUniqueId: 02c2bb81-440f11f0-93b0fef6-cb89a0f5
+entryUUID: 1f69cfe5-4dc9-47c0-8de4-674c4a20bf8e
+dsEntryDN: ou=Service Accounts,dc=h,dc=bbassett,dc=net
+
+# entry-id: 5
+dn: uid=LDAP Bind,ou=Service Accounts,dc=h,dc=bbassett,dc=net
+objectClass: top
+objectClass: account
+objectClass: simplesecurityobject
+uid: LDAP Bind
+userPassword:: e1BCS0RGMi1TSEE1MTJ9MTAwMDAkYjhhWlBlZEF1SXJ3UWRSUXdMTUlnblNNQVh
+ zNlZzWkQkUW5xcWRUams2VFhDdk5SOGRyMDhSSXZNRllHcjJOTU9IR0RjVmY2QlpGN0xjVnFpbFkv
+ eXh4UW5HcC90a3ZaMkUvTGErWkU2eFIxcDArKzFnSlZndlE9PQ==
+creatorsName: cn=Directory Manager
+modifiersName: cn=Directory Manager
+createTimestamp: 20250608022708Z
+modifyTimestamp: 20250608022708Z
+nsUniqueId: fd19a581-440f11f0-93b0fef6-cb89a0f5
+entryUUID: 0d6e1570-9d96-4037-b83f-0dc7ffd05bd9
+dsEntryDN: uid=LDAP Bind,ou=Service Accounts,dc=h,dc=bbassett,dc=net
+
