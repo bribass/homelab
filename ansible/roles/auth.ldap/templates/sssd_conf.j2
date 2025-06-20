@@ -1,0 +1,41 @@
+[sssd]
+config_file_version = 2
+services = nss, pam, sudo
+domains = homelab-auth
+reconnection_retries = 3
+timeout = 120
+
+[nss]
+reconnection_retries = 3
+enum_cache_timeout = 600
+filter_users = root
+filter_groups = root
+
+[pam]
+reconnection_retries = 3
+pam_id_timeout = 600
+
+[sudo]
+
+[domain/homelab-auth]
+id_provider = ldap
+auth_provider = ldap
+sudo_provider = ldap
+autofs_provider = ldap
+access_provider = permit
+
+min_id = 100
+max_id = 999999
+enumerate = False
+cache_credentials = True
+debug_level = 0
+lookup_family_order = ipv4_first
+
+ldap_uri = ldap://auth.h.bbassett.net
+ldap_search_base = dc=h,dc=bbassett,dc=net
+ldap_schema = rfc2307bis
+ldap_default_bind_dn = uid=LDAP Bind,ou=Service Accounts,dc=h,dc=bbassett,dc=net
+ldap_default_authtok_type = password
+ldap_default_authtok = 12345
+ldap_tls_reqcert = never
+

@@ -8,9 +8,12 @@ dc: h
 creatorsName: cn=Directory Manager
 modifiersName: cn=Directory Manager
 createTimestamp: 20250608012625Z
-modifyTimestamp: 20250608012625Z
+modifyTimestamp: 20250614041839Z
 nsUniqueId: 7791f781-440711f0-93b0fef6-cb89a0f5
 entryUUID: 9988244a-584c-4012-82e8-628b19231d9f
+aci: (targetattr="*")(version 3.0; acl "Search for bind"; allow (read, search,
+  compare) userdn="ldap:///uid=LDAP Bind,ou=Service Accounts,dc=h,dc=bbassett,
+ dc=net";)
 dsEntryDN: dc=h,dc=bbassett,dc=net
 
 # entry-id: 2
@@ -68,4 +71,35 @@ modifyTimestamp: 20250608022708Z
 nsUniqueId: fd19a581-440f11f0-93b0fef6-cb89a0f5
 entryUUID: 0d6e1570-9d96-4037-b83f-0dc7ffd05bd9
 dsEntryDN: uid=LDAP Bind,ou=Service Accounts,dc=h,dc=bbassett,dc=net
+
+# entry-id: 6
+dn: ou=Sudoers,dc=h,dc=bbassett,dc=net
+objectClass: top
+objectClass: organizationalUnit
+ou: Sudoers
+creatorsName: cn=Directory Manager
+modifiersName: cn=Directory Manager
+createTimestamp: 20250613215409Z
+modifyTimestamp: 20250613215409Z
+nsUniqueId: d8567f81-48a011f0-93b0fef6-cb89a0f5
+entryUUID: 132941b4-651f-4998-8fd6-4502ca4de4b4
+dsEntryDN: ou=Sudoers,dc=h,dc=bbassett,dc=net
+
+# entry-id: 7
+dn: cn=brian,ou=Sudoers,dc=h,dc=bbassett,dc=net
+objectClass: top
+objectClass: sudorole
+cn: brian
+description: This is Brian's homelab, afterall.  :)
+sudoCommand: ALL
+sudoHost: ALL
+sudoOption: !authenticate
+sudoUser: brian
+creatorsName: cn=Directory Manager
+modifiersName: cn=Directory Manager
+createTimestamp: 20250613221040Z
+modifyTimestamp: 20250613221040Z
+nsUniqueId: 384e2581-48a311f0-93b0fef6-cb89a0f5
+entryUUID: 72b3deb9-9335-40d1-915f-0bdc85049e5e
+dsEntryDN: cn=brian,ou=Sudoers,dc=h,dc=bbassett,dc=net
 

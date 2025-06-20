@@ -13,3 +13,6 @@
       - cockpit-389-ds
       state: present
 
+  - import_role:
+      name: auth.ldap
+

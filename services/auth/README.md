@@ -8,3 +8,7 @@
 
 This container hosts the homelab's authentication mechanisms.  LDAP (specifically, [389 Directory Server](https://www.port389.org)) provides the canonical storage for users and credentials.  Future authentication related features (e.g., an OpenID provider or a user password recovery page) will be deployed to this container.
 
+## References
+
+- https://www.suse.com/support/kb/doc/?id=000020983: Configuring TLS keys in 389
+

@@ -1,6 +1,9 @@
 - hosts: filer
   tasks:
   - import_role:
+      name: auth.ldap
+
+  - import_role:
       name: install.cockpit
 
   - name: Install Cockpit extensions from GitHub
@@ -9,12 +12,6 @@
     vars:
       github: "{{ item.value }}"
     with_dict: "{{ versions }}"
-
-  - name: Configure sudoers for admin users
-    community.general.sudoers:
-      name: admin-users
-      user: brian
-      commands: ALL
 
   vars:
     versions:
