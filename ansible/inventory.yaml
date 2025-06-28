@@ -12,4 +12,6 @@ all:
           hosts:
             filer:
             auth:
+  hosts:
+    power:
 

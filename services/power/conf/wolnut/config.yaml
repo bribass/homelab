@@ -1,0 +1,20 @@
+log_level: INFO
+
+nut:
+  ups: "amznbasics800@localhost"
+  username: upsmon
+  password: 12345
+
+poll_interval: 15
+
+wake_on:
+  restore_delay_sec: 30
+  min_battery_percent: 25
+  client_timeout_sec: 600
+  reattempt_delay: 30
+
+clients:
+- name: omega
+  host: 10.1.1.8
+  mac: 58:47:ca:7b:dd:35
+

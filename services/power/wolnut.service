@@ -1,0 +1,14 @@
+[Unit]
+Description=wolnut
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=/opt/wolnut/.venv/bin/python -u wolnut/main.py
+WorkingDirectory=/opt/wolnut
+Environment='PYTHONPATH=/opt/wolnut'
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
+

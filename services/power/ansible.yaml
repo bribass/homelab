@@ -1,0 +1,84 @@
+- hosts: power
+  tasks:
+  - name: Install NUT and tools from Debian
+    become: yes
+    ansible.builtin.apt:
+      update_cache: true
+      install_recommends: false
+      name:
+      - nut
+      - nut-cgi
+      - lighttpd
+      - git
+      - python3-venv
+      - python3-pkg-resources
+      state: present
+
+  - name: Configure NUT
+    ansible.builtin.copy:
+      src: conf/nut/
+      dest: /etc/nut
+      owner: root
+      group: nut
+    notify: Restart NUT
+
+  - name: Configure lighttpd
+    ansible.builtin.file:
+      src: '../conf-available/10-cgi.conf'
+      dest: '/etc/lighttpd/conf-enabled/10-cgi.conf'
+      state: link
+    notify: Restart lighttpd
+
+  - name: Git clone wolnut from GitHub
+    ansible.builtin.git:
+      repo: 'https://github.com/hardwarehaven/wolnut.git'
+      dest: /opt/wolnut
+      version: ec621ee89bd2c02dd7003c9e60eed4b0d11758c4
+    notify: Restart wolnut
+
+  - name: Python venv for wolnut
+    ansible.builtin.pip:
+      virtualenv: /opt/wolnut/.venv
+      virtualenv_command: "{{ ansible_python.executable }} -m venv"
+      requirements: /opt/wolnut/requirements.txt
+
+  - name: Configure wolnut
+    ansible.builtin.copy:
+      src: conf/wolnut/
+      dest: /opt/wolnut
+    notify: Restart wolnut
+
+  - name: Systemd unit for wolnut
+    block:
+    - name: Install service unit file
+      ansible.builtin.copy:
+        src: wolnut.service
+        dest: /etc/systemd/system
+
+    - name: Register service with systemd
+      ansible.builtin.systemd_service:
+        name: wolnut
+        daemon_reload: true
+        enabled: true
+
+    notify: Restart wolnut
+
+  handlers:
+    - name: Restart NUT
+      ansible.builtin.systemd_service:
+        name: "{{ item }}"
+        state: restarted
+      loop:
+      - nut-server
+      - nut-monitor
+
+    - name: Restart lighttpd
+      ansible.builtin.systemd_service:
+        name: lighttpd
+        state: restarted
+
+    - name: Restart wolnut
+      ansible.builtin.systemd_service:
+        name: wolnut
+        state: restarted
+

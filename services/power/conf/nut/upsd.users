@@ -1,0 +1,9 @@
+[admin]
+password = jiB8426
+actions = SET
+instcmds = ALL
+
+[upsmon]
+password = 12345
+upsmon primary
+
