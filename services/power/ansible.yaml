@@ -15,11 +15,30 @@
       state: present
 
   - name: Configure NUT
-    ansible.builtin.copy:
-      src: conf/nut/
-      dest: /etc/nut
+    ansible.builtin.template:
+      src: "conf/nut/{{ item }}"
+      dest: "/etc/nut/{{ item }}"
       owner: root
       group: nut
+      mode: '0640'
+    loop:
+    - nut.conf
+    - ups.conf
+    - upsd.conf
+    - upsd.users
+    - upsmon.conf
+    notify: Restart NUT
+
+  - name: Configure NUT CGI
+    ansible.builtin.template:
+      src: "conf/nut/{{ item }}"
+      dest: "/etc/nut/{{ item }}"
+      owner: root
+      group: nut
+      mode: '0644'
+    loop:
+    - hosts.conf
+    - upsset.conf
     notify: Restart NUT
 
   - name: Configure lighttpd
@@ -43,9 +62,12 @@
       requirements: /opt/wolnut/requirements.txt
 
   - name: Configure wolnut
-    ansible.builtin.copy:
-      src: conf/wolnut/
-      dest: /opt/wolnut
+    ansible.builtin.template:
+      src: conf/wolnut/config.yaml
+      dest: /opt/wolnut/config.yaml
+      owner: root
+      group: root
+      mode: '0644'
     notify: Restart wolnut
 
   - name: Systemd unit for wolnut

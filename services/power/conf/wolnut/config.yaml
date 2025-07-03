@@ -3,7 +3,7 @@ log_level: INFO
 nut:
   ups: "amznbasics800@localhost"
   username: upsmon
-  password: 12345
+  password: {{ passwd.nut.upsmon }}
 
 poll_interval: 15
 

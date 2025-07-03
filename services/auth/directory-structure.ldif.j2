@@ -5,6 +5,7 @@ dn: dc=h,dc=bbassett,dc=net
 objectClass: top
 objectClass: domain
 dc: h
+userPassword:: {{ passwd.auth.mgr | b64encode }}
 creatorsName: cn=Directory Manager
 modifiersName: cn=Directory Manager
 createTimestamp: 20250608012625Z
@@ -61,9 +62,7 @@ objectClass: top
 objectClass: account
 objectClass: simplesecurityobject
 uid: LDAP Bind
-userPassword:: e1BCS0RGMi1TSEE1MTJ9MTAwMDAkYjhhWlBlZEF1SXJ3UWRSUXdMTUlnblNNQVh
- zNlZzWkQkUW5xcWRUams2VFhDdk5SOGRyMDhSSXZNRllHcjJOTU9IR0RjVmY2QlpGN0xjVnFpbFkv
- eXh4UW5HcC90a3ZaMkUvTGErWkU2eFIxcDArKzFnSlZndlE9PQ==
+userPassword:: {{ passwd.auth.bind | b64encode }}
 creatorsName: cn=Directory Manager
 modifiersName: cn=Directory Manager
 createTimestamp: 20250608022708Z

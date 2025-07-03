@@ -1,9 +1,9 @@
 [admin]
-password = jiB8426
+password = {{ passwd.nut.admin }}
 actions = SET
 instcmds = ALL
 
 [upsmon]
-password = 12345
+password = {{ passwd.nut.upsmon }}
 upsmon primary
 

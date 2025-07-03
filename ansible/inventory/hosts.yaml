@@ -1,0 +1,16 @@
+proxmox_hosts:
+  hosts:
+    omega:
+      ansible_host: 10.1.1.8
+proxmox_hosted:
+  children:
+    proxmox_vms:
+      hosts:
+    proxmox_lxc:
+      hosts:
+        filer:
+        auth:
+ungrouped:
+  hosts:
+    power:
+

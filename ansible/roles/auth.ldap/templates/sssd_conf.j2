@@ -36,6 +36,6 @@ ldap_search_base = dc=h,dc=bbassett,dc=net
 ldap_schema = rfc2307bis
 ldap_default_bind_dn = uid=LDAP Bind,ou=Service Accounts,dc=h,dc=bbassett,dc=net
 ldap_default_authtok_type = password
-ldap_default_authtok = 12345
+ldap_default_authtok = {{ passwd.auth.bind }}
 ldap_tls_reqcert = never
 
