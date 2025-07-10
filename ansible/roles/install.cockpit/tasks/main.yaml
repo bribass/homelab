@@ -13,3 +13,7 @@
     state: absent
     regexp: '^#?root'
 
+- name: Add service to summary listing
+  ansible.builtin.set_fact:
+    services: "{{ services | default([]) + services_additional }}"
+

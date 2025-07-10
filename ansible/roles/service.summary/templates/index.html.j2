@@ -1,0 +1,32 @@
+
+<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
+ <title>Homelab Resources: {{ ansible_fqdn }}</title>
+ <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div id="banner">Homelab Resources: {{ ansible_fqdn }}</div>
+<div id="content">
+{% include "summary/intro.j2" ignore missing %}
+<br>
+<h2>Available Services</h2>
+<table class="tech">
+ <tbody><tr class="headrow">
+  <td>Service</td>
+  <td>Location</td>
+  <td>Description</td>
+ </tr>
+ {% for service in services %}
+ <tr>
+  <td>{{ service.name }}</td>
+  <td>{% if service.url is defined %}<a href="{{ service.url }}">{{ service.url }}</a>{% endif %}
+{% if service.ports is defined %}<tt>{{ service.ports }}</tt>{% endif %}
+</td>
+  <td>{{ service.desc }}</td>
+ </tr>
+ {% endfor %}
+</tbody></table>
+<br>
+{% include "summary/additional.j2" ignore missing %}
+</div>
+</body>
+</html>

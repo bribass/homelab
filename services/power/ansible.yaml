@@ -72,18 +72,21 @@
 
   - name: Systemd unit for wolnut
     block:
-    - name: Install service unit file
+    - name: 'Systemd unit for wolnut : Install service unit file'
       ansible.builtin.copy:
         src: wolnut.service
         dest: /etc/systemd/system
 
-    - name: Register service with systemd
+    - name: 'Systemd unit for wolnut : Register service with systemd'
       ansible.builtin.systemd_service:
         name: wolnut
         daemon_reload: true
         enabled: true
 
     notify: Restart wolnut
+
+  - import_role:
+      name: service.summary
 
   handlers:
   - name: Restart NUT
@@ -103,4 +106,16 @@
     ansible.builtin.systemd_service:
       name: wolnut
       state: restarted
+
+  vars:
+    services:
+    - name: NUT Daemon
+      desc: "The <a href='https://networkupstools.org/'>NUT</a> <tt>upsd</tt> server daemon."
+      ports: 3493/tcp
+    - name: NUT Status
+      desc: "Web-based status page for all UPS devices managed by NUT."
+      url: "http://{{ ansible_fqdn }}/cgi-bin/nut/upsstats.cgi"
+    - name: NUT Settings
+      desc: "Web-based reading of UPS variables and running of UPS instant commands."
+      url: "http://{{ ansible_fqdn }}/cgi-bin/nut/upsset.cgi"
 

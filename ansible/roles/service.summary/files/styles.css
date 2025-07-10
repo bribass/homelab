@@ -1,0 +1,149 @@
+html, body, div, p, h1, h2, h3, ol, ul, li, td, a, img
+{
+	margin: 0;
+	padding: 0;
+	border: 0;
+}
+body
+{
+	font: 76% Inter, Arial, Helvetica, sans-serif;
+	height: 100%;
+	overflow: auto;
+}
+h1, h2, h3, h4
+{
+	font: bold 1.3em Inter, Arial, Helvetica, sans-serif;
+	color: #666666;
+	padding: 9px 0px 2px;
+}
+h1
+{
+	font-weight: bold;
+	font-size: 1.75em;
+	padding: 0px 10px 0px 0px;
+}
+h2
+{
+	font-weight: bold;
+	font-size: 1.3em;
+	padding: 0px 10px 0px 0px;
+}
+h3
+{
+	font-style: italic;
+	font-size: 1.2em;
+}
+h4
+{
+	font-weight: normal;
+	font-size: 1.2em;
+}
+p
+{
+	font-size: 1em;
+	line-height: 1.4em;
+	padding: 2px 0px 4px 0px;
+	color: #333;
+}
+a
+{
+	color: #1d5e98;
+	text-decoration: none;
+}
+a:hover
+{
+	text-decoration: underline;
+}
+tt
+{
+	font-size: 120%;
+}
+hr
+{
+	height: 0;
+	border: 0;
+	border-bottom: 1px solid #999;
+	margin-top: 12px;
+}
+table.tech
+{
+	/*width: 100%;*/
+	font-size: 1em;
+	line-height: 1.4em;
+	max-width: 100%;
+	padding-right: 0px;
+	/*	border-top: 1px solid gray;
+	border-left: 1px solid gray;
+	border-bottom: 0px solid gray;
+	border-right: 0px solid gray;*/
+	border-collapse: collapse;
+}
+table.tech th, table.tech td
+{
+	vertical-align: top;
+	border: 1px;
+	padding-left: 4px;
+	padding-right: 30px;
+	padding-top: 4px;
+	padding-bottom: 2px;
+	/*	border-top: 0px solid gray;
+	border-left: 0px solid gray;
+	border-bottom: 1px solid gray;
+	border-right: 1px solid gray; */
+	width: 33%;
+}
+.heading
+{
+	font: bold 1.3em Inter, Arial, Helvetica, sans-serif;
+	color: #666666;
+	font-size: 1.2em;
+}
+.headrow
+{
+	background-color: #e0e0e0;
+	font-weight: bold;
+}
+ul, li
+{
+	color: #333;
+	line-height: 1.3em;
+	margin: 0px 0px 4px 12px;
+}
+ol
+{
+	line-height: 1.4em;
+	margin: 0px 0px 8px 16px;
+}
+.procedure
+{
+	padding-left: 3.5em;
+}
+.commands
+{
+	font-size: 120%;
+	padding: .5em;
+	background-color: #e0e0e0;
+	border: solid black 1px;
+}
+
+/* PAGE SKELETON */
+#banner
+{
+	border: none;
+	border-bottom: solid #666666 3pt;
+	background: #BD3137; padding: 10px 10px;
+	font-family: Inter, Arial, Helvetica, sans-serif;
+	font-size: 20pt;
+	font-weight: bold;
+	color: white;
+	margin-bottom: 12px
+}
+#content
+{
+	margin: 0 30px 0 30px;
+}
+#footer
+{
+	margin: 12px 0px 0px 0px;
+	font-size: 0.8em;
+}

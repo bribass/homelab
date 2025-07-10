@@ -16,3 +16,12 @@
   - import_role:
       name: auth.ldap
 
+  - import_role:
+      name: service.summary
+
+  vars:
+    services:
+    - name: LDAP
+      desc: "Lightweight Directory Access Protocol"
+      ports: 389/tcp
+

@@ -13,6 +13,9 @@
       github: "{{ item.value }}"
     with_dict: "{{ versions }}"
 
+  - import_role:
+      name: service.summary
+
   vars:
     versions:
       cockpit_file_sharing:
@@ -30,4 +33,12 @@
         release: 0.1.12
         package_name: "cockpit-identities"
         suffix: "-1focal_all.deb"
+
+    services:
+    - name: Windows Networking
+      desc: "Windows native file sharing; provided by SMB"
+      ports: 139/tcp, 445/tcp
+    - name: NFS
+      desc: "UNIX native file sharing; used by Linux"
+      ports: 2049/tcp, 2049/udp, 111/tcp, 111/udp
 

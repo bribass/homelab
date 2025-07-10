@@ -1,0 +1,31 @@
+- name: Determine distro-specific paths
+  ansible.builtin.include_vars:
+    file: "{{ ansible_distribution | lower }}.yaml"
+
+- name: Copy static resources
+  ansible.builtin.copy:
+    src: ./
+    dest: "{{ www_root }}/"
+    owner: "{{ www_user }}"
+    group: "{{ www_group }}"
+
+- name: Process main HTML template
+  ansible.builtin.template:
+    src: index.html.j2
+    dest: "{{ www_root }}/index.html"
+    owner: "{{ www_user }}"
+    group: "{{ www_group }}"
+
+- name: Stash service summary information to controller
+  block:
+  - name: 'Stash service summary information to controller : Make destination directory'
+    ansible.builtin.file:
+      path: "{{ playbook_dir }}/summary"
+      state: directory
+
+  - name: 'Stash service summary information to controller : Write out YAML file'
+    ansible.builtin.template:
+      src: services.yaml.j2
+      dest: "{{ playbook_dir }}/summary/services.yaml"
+  delegate_to: localhost
+
