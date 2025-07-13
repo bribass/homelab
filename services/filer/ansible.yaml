@@ -11,7 +11,9 @@
       name: install.deb_from_github
     vars:
       github: "{{ item.value }}"
-    with_dict: "{{ versions }}"
+    loop: "{{ versions | dict2items }}"
+    loop_control:
+      label: "{{ item.value.package_name }}"
 
   - import_role:
       name: service.summary

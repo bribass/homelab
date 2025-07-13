@@ -18,6 +18,13 @@
 
 - name: Stash service summary information to controller
   block:
+  - name: 'Stash service summary information to controller : Compute required info'
+    ansible.builtin.set_fact:
+      services_info: "{{ services_info | combine( [{'key': item, 'value': lookup('ansible.builtin.vars', item)}] | items2dict ) }}"
+    loop: "{{ [ 'services' ] + lookup('template_vars', 'summary/additional.j2', ignore_missing=True, wantlist=True) }}"
+    vars:
+      services_info: {}
+
   - name: 'Stash service summary information to controller : Make destination directory'
     ansible.builtin.file:
       path: "{{ playbook_dir }}/summary"
