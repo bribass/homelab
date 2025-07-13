@@ -10,4 +10,7 @@ This container is intended to act as a file server, while taking advantage of th
 
 ## References
 - https://apalrd.net/posts/2023/ultimate_nas/: The general idea behind this setup.
+- https://admin.shamot.cz/index.php/2018/03/26/configuring-samba-with-ldap-on-centos-rhel-7/: Inspiration for Samba/LDAP integration.
+- https://www.port389.org/docs/389ds/howto/howto-samba.html: Contains more hints on what a working setup looks like.
+- https://superuser.com/questions/386600/generate-samba-password-hash-programmatically: For future use with unified password reset web app.
 

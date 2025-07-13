@@ -1,0 +1,24 @@
+<h2>Available Shares</h2>
+<table class="tech">
+ <tbody><tr class="headrow">
+  <td>Share</td>
+  <td>Description</td>
+  <td>Windows Networking (SMB)</td>
+  <td>NFS</td>
+ </tr>
+ <tr>
+  <td>homes</td>
+  <td>Home Directories</td>
+  <td><tt>\\{{ ansible_hostname }}\<i>username</i></tt></td>
+  <td><tt>{{ ansible_default_ipv4.address }}:/home</tt></td>
+ </tr>
+ {% for share in shares %}
+ <tr>
+  <td>{{ share.name }}</td>
+  <td>{{ share.desc }}</td>
+  <td>{% if share.smb is defined %}<tt>\\{{ ansible_hostname }}\{{ share.name }}</tt>{% else %}<i>n/a</i>{% endif %}</td>
+  <td>{% if share.nfs is defined %}<tt>{{ ansible_default_ipv4.address }}:{{ share.dir.path }}</tt>{% else %}<i>n/a</i>{% endif %}</td>
+ </tr>
+ {% endfor %}
+</tbody></table>
+<br>

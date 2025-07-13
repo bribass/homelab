@@ -15,26 +15,132 @@
     loop_control:
       label: "{{ item.value.package_name }}"
 
+  - name: Install packages from Debian
+    ansible.builtin.apt:
+      update_cache: true
+      install_recommends: false
+      name:
+      - samba
+      - nfs-kernel-server
+      state: present
+
+  - name: Configure Samba
+    ansible.builtin.template:
+      src: conf/smb/smb.conf.j2
+      dest: /etc/samba/smb.conf
+      owner: root
+      group: root
+      mode: '0644'
+    notify: Restart Samba
+
+  - name: Set Samba admin LDAP bind password
+    ansible.builtin.command:
+      cmd: /usr/bin/smbpasswd -W
+      stdin: |
+        {{ passwd.auth.mgr }}
+        {{ passwd.auth.mgr }}
+
+  - name: Configure NFS
+    ansible.builtin.template:
+      src: conf/nfs/exports.j2
+      dest: /etc/exports
+      owner: root
+      group: root
+      mode: '0644'
+    notify: Restart NFS
+
+  - name: Make sure shares exist
+    ansible.builtin.file:
+      path: "{{ item.dir.path }}"
+      state: directory
+      owner: "{{ item.dir.owner }}"
+      group: "{{ item.dir.group }}"
+      mode: "{{ item.dir.mode }}"
+    loop: "{{ shares }}"
+    loop_control:
+      label: "{{ item.name }}"
+
   - import_role:
       name: service.summary
 
+  handlers:
+  - name: Restart Samba
+    ansible.builtin.systemd_service:
+      name: "{{ item }}"
+      state: restarted
+    loop:
+      - smbd
+      - nmbd
+
+  - name: Restart NFS
+    ansible.builtin.systemd_service:
+      name: nfs-server
+      state: restarted
+
   vars:
     versions:
-      cockpit_file_sharing:
-        github_project: "45Drives/cockpit-file-sharing"
-        release: 4.2.10-3
-        package_name: "cockpit-file-sharing"
-        suffix: "focal_all.deb"
       cockpit_navigator:
         github_project: "45Drives/cockpit-navigator"
         release: 0.5.10
         package_name: "cockpit-navigator"
         suffix: "-1focal_all.deb"
-      cockpit_identities:
-        github_project: "45Drives/cockpit-identities"
-        release: 0.1.12
-        package_name: "cockpit-identities"
-        suffix: "-1focal_all.deb"
+
+    shares:
+    - name: media
+      dir:
+        path: /vol/media
+        owner: root
+        group: users
+        mode: '0775'
+      desc: Media files
+      smb:
+        guest: false
+        readonly: false
+        browsable: true
+        inherit: false
+      nfs:
+        fsid: 85f34ef9-6271-4b63-85f7-ddf98ad12f27
+        clients:
+        - hostname: '*'
+          options: rw,sync,no_subtree_check
+
+    - name: photo
+      dir:
+        path: /vol/photo
+        owner: root
+        group: users
+        mode: '0775'
+      desc: Photos
+      smb:
+        guest: false
+        readonly: false
+        browsable: true
+        inherit: false
+      nfs:
+        fsid: 933a2cc7-6003-11f0-950c-f875a4b2358c
+        clients:
+        - hostname: '*'
+          options: rw,sync,no_subtree_check
+
+    - name: backup
+      dir:
+        path: /vol/backup
+        owner: backup
+        group: backup
+        mode: '0775'
+      desc: Backups
+      smb:
+        guest: false
+        readonly: true
+        browsable: true
+        inherit: false
+        # additional_config: |
+        #  write list = backup
+      nfs:
+        fsid: 011bdab4-6005-11f0-9bcf-f875a4b2358c
+        clients:
+        - hostname: '*'
+          options: rw,sync,no_subtree_check
 
     services:
     - name: Windows Networking

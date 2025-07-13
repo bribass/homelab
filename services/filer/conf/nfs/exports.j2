@@ -1,0 +1,3 @@
+/home -fsid=e0169c7d-5e84-11f0-b01d-f875a4b2358c *(rw,sync,no_subtree_check)  # Home directories
+{% for share in shares %}{% if share.nfs is defined %}{{ share.dir.path }} -fsid={{ share.nfs.fsid }} {% for client in share.nfs.clients %}{{ client.hostname }}({{ client.options }}) {% endfor %}  # {{ share.desc }}
+{% endif %}{% endfor %}
