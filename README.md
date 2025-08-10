@@ -14,7 +14,8 @@ The lab system is centralized on a single host, with the following components:
 | Storage Controller | [LSI SAS2308 HBA](https://www.amazon.com/dp/B0BXPWJLM6) |
 | Storage | 8x various SATA NAS drives (4x WD Red, 4x Seagate IronWolf) |
 |         | 512 GB NVMe SSD (for operating system) |
-| Operating System | [Proxmox VE](https://proxmox.com) 8.4 |
+| Network | [Intel 82599 10GbE](https://www.amazon.com/dp/B0DGV4WQTJ) and [SFP+ modules](https://www.amazon.com/dp/B077T46LPJ) |
+| Operating System | [Proxmox VE](https://proxmox.com) 9.0 |
 
 The system was inspired by [Alex](https://github.com/IronicBadger/pms-wiki)'s [Perfect Media Server](https://perfectmediaserver.com) project,
 and component selection included influences from various PC hardware YouTubers
