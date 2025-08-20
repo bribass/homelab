@@ -15,4 +15,5 @@ This container is intended to act as a file server, while taking advantage of th
 - https://www.port389.org/docs/389ds/howto/howto-samba.html: Contains more hints on what a working setup looks like.
 - https://superuser.com/questions/386600/generate-samba-password-hash-programmatically: For future use with unified password reset web app.
 - https://blog.joeplaa.com/proxmox-nfs-in-lxc/: Contains all the requirements for getting the NFS kernel server working.
+- https://www.linuxbabe.com/ubuntu/install-dropbox-headless-ubuntu-server: Dropbox integration.
 
