@@ -71,18 +71,10 @@
     notify: Restart wolnut
 
   - name: Systemd unit for wolnut
-    block:
-    - name: 'Systemd unit for wolnut : Install service unit file'
-      ansible.builtin.copy:
-        src: wolnut.service
-        dest: /etc/systemd/system
-
-    - name: 'Systemd unit for wolnut : Register service with systemd'
-      ansible.builtin.systemd_service:
-        name: wolnut
-        daemon_reload: true
-        enabled: true
-
+    import_role:
+      name: local.systemd
+    vars:
+      service_name: wolnut
     notify: Restart wolnut
 
   - import_role:

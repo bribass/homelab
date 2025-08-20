@@ -24,6 +24,47 @@
       - nfs-kernel-server
       state: present
 
+  - name: Create user for Dropbox
+    ansible.builtin.user:
+      name: dropbox
+      group: users
+      system: true
+      password: '*'
+      home: "{{ dropbox.home_dir }}"
+      create_home: true
+      state: present
+
+  - name: Install binaries from Dropbox
+    block:
+    - name: 'Install binaries from Dropbox : Download Dropbox daemon'
+      ansible.builtin.get_url:
+        url: "https://www.dropbox.com/download?plat=lnx.x86_64"
+        dest: "{{ dropbox.home_dir }}/dropbox.tar.gz"
+
+    - name: 'Install binaries from Dropbox : Unpack Dropbox daemon'
+      ansible.builtin.unarchive:
+        src: "{{ dropbox.home_dir }}/dropbox.tar.gz"
+        dest: "{{ dropbox.home_dir }}"
+        remote_src: true
+        creates: "{{ dropbox.home_dir }}/.dropbox-dist"
+        owner: dropbox
+        group: users
+
+    - name: 'Install binaries from Dropbox : Create user bin directory'
+      ansible.builtin.file:
+        dest: "{{ dropbox.bin_dir }}"
+        owner: dropbox
+        group: users
+        state: directory
+
+    - name: 'Install binaries from Dropbox : Download Dropbox CLI'
+      ansible.builtin.get_url:
+        url: "https://www.dropbox.com/download?dl=packages/dropbox.py"
+        dest: "{{ dropbox.bin_dir }}/dropbox"
+        owner: dropbox
+        group: users
+        mode: '0775'
+
   - name: Configure Samba
     ansible.builtin.template:
       src: conf/smb/smb.conf.j2
@@ -49,6 +90,14 @@
       mode: '0644'
     notify: Restart NFS
 
+  - name: Create Dropbox directory
+    ansible.builtin.file:
+      src: "{{ dropbox.dropbox_dir }}"
+      dest: "{{ dropbox.home_dir }}/Dropbox"
+      owner: dropbox
+      group: users
+      state: link
+
   - name: Make sure shares exist
     ansible.builtin.file:
       path: "{{ item.dir.path }}"
@@ -59,6 +108,13 @@
     loop: "{{ shares }}"
     loop_control:
       label: "{{ item.name }}"
+
+  - name: Systemd unit for Dropbox
+    import_role:
+      name: local.systemd
+    vars:
+      service_name: dropbox
+    notify: Restart Dropbox
 
   - import_role:
       name: service.summary
@@ -75,6 +131,11 @@
   - name: Restart NFS
     ansible.builtin.systemd_service:
       name: nfs-server
+      state: restarted
+
+  - name: Restart Dropbox
+    ansible.builtin.systemd_service:
+      name: dropbox
       state: restarted
 
   vars:
@@ -142,6 +203,24 @@
         - hostname: '*'
           options: rw,sync,no_subtree_check
 
+    - name: dropbox
+      dir:
+        path: "{{ dropbox.dropbox_dir }}"
+        owner: dropbox
+        group: users
+        mode: '0775'
+      desc: Dropbox
+      smb:
+        guest: false
+        readonly: true
+        browsable: true
+        inherit: false
+      nfs:
+        fsid: b08616a7-7ca2-11f0-96f0-f875a4b2358c
+        clients:
+        - hostname: '*'
+          options: ro,sync,no_subtree_check
+
     services:
     - name: Windows Networking
       desc: "Windows native file sharing; provided by SMB"
@@ -149,4 +228,9 @@
     - name: NFS
       desc: "UNIX native file sharing; used by Linux"
       ports: 2049/tcp, 2049/udp, 111/tcp, 111/udp
+
+    dropbox:
+      home_dir: /srv/dropbox
+      bin_dir: /srv/dropbox/.local/bin
+      dropbox_dir: /vol/dropbox
 

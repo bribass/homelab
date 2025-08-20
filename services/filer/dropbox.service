@@ -1,0 +1,14 @@
+[Unit]
+Description=Dropbox
+After=network.target
+
+[Service]
+User=dropbox
+ExecStart=/srv/dropbox/.dropbox-dist/dropboxd
+ExecStop=/bin/kill -HUP $MAINPID
+Type=simple
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
+
