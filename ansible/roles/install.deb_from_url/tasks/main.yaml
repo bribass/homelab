@@ -1,0 +1,25 @@
+
+- name: Create local cache directory for package files
+  file:
+    path: "{{ cache_dir }}"
+    state: directory
+    mode: "0755"
+
+- name: Check if {{ package_name }} is installed
+  command: dpkg-query --show "{{ package_name }}"
+  register: install_deb_url_check
+  failed_when: install_deb_url_check.rc > 1
+  changed_when: install_deb_url_check.rc == 1
+
+- name: Download {{ package_name }} package to cache
+  get_url:
+    url: "{{ url }}"
+    dest: "{{ cache_dir }}/{{ deb_file }}"
+  when: install_deb_url_check.rc == 1
+
+- name: Install {{ package_name }} package
+  become: true
+  apt:
+    deb: "{{ cache_dir }}/{{ deb_file }}"
+  when: install_deb_url_check.rc == 1
+
