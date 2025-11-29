@@ -1,0 +1,150 @@
+- hosts: db
+  tasks:
+  - import_role:
+      name: auth.ldap
+
+  - name: Install packages from Debian
+    ansible.builtin.apt:
+      update_cache: true
+      install_recommends: false
+      name:
+      - postgresql
+      - postgresql-client
+      - phppgadmin
+      - apache2
+      - ruby-pg-ldap-sync
+      - python3-psycopg2
+      state: present
+
+  - name: Set password for 'postgres' user
+    community.postgresql.postgresql_user:
+      name: postgres
+      password: "{{ passwd.postgresql.postgres }}"
+      encrypted: true
+    become: yes
+    become_user: postgres
+    become_method: su
+
+  - name: Configure Postgres for local network connection
+    ansible.builtin.lineinfile:
+      path: "{{ postgres.conf_dir }}/postgresql.conf"
+      state: present
+      regexp: listen_addresses
+      line: "listen_addresses = '*'"
+    notify: Restart Postgres
+
+  - name: Configure Postgres for authentication
+    community.postgresql.postgresql_pg_hba:
+      dest: "{{ postgres.conf_dir }}/pg_hba.conf"
+      overwrite: true
+      create: true
+
+      rules:
+      - contype: local
+        databases: replication
+        users: all
+        method: peer
+        comment: Allow replication connections from localhost (UNIX domain socket)
+
+      - contype: host
+        databases: all
+        users: replication
+        address: "127.0.0.1/32"
+        method: scram-sha-256
+        comment: Allow replication connections from localhost (IPv4)
+
+      - contype: host
+        databases: all
+        users: replication
+        address: "::1/128"
+        method: scram-sha-256
+        comment: Allow replication connections from localhost (IPv6)
+
+      - contype: local
+        databases: all
+        users: postgres
+        method: peer
+        comment: Admin localhost (UNIX domain socket)
+
+      - contype: host
+        databases: all
+        users: postgres
+        address: "127.0.0.1/32"
+        method: scram-sha-256
+        comment: Admin localhost (IPv4)
+
+      - contype: host
+        databases: all
+        users: postgres
+        address: "::1/128"
+        method: scram-sha-256
+        comment: Admin localhost (IPv6)
+
+      - contype: host
+        databases: all
+        users: all
+        address: all
+        method: ldap
+        options: 'ldapserver="auth.h.bbassett.net" ldapbasedn="dc=h,dc=bbassett,dc=net" ldapsearchfilter="(|(&(objectClass=posixAccount)(cn=$username))(&(objectClass=account)(uid=$username)))" ldapbinddn="uid=LDAP Bind,ou=Service Accounts,dc=h,dc=bbassett,dc=net" ldapbindpasswd="{{ passwd.auth.bind }}"'
+        comment: LDAP Auth
+    notify: Restart Postgres
+
+  - name: Configure phpPgAdmin for local network connection
+    ansible.builtin.lineinfile:
+      path: /etc/apache2/conf-enabled/phppgadmin.conf
+      state: present
+      regexp: Require
+      line: "Require all granted"
+
+  - name: Configure pg-ldap-sync for LDAP configuration
+    ansible.builtin.template:
+      src: conf/pg_ldap_sync.yaml.j2
+      dest: /etc/pg_ldap_sync.yaml
+      owner: root
+      group: root
+      mode: '0644'
+
+  - name: Configure Postgres for pg-ldap-sync (groups)
+    community.postgresql.postgresql_user:
+      name: ldap_groups
+      role_attr_flags: NOLOGIN
+      state: present
+      login_user: postgres
+      login_password: "{{ passwd.postgresql.postgres }}"
+    become: yes
+    become_user: postgres
+    become_method: su
+
+  - name: Configure Postgres for pg-ldap-sync (users)
+    community.postgresql.postgresql_user:
+      name: ldap_users
+      role_attr_flags: NOLOGIN
+      state: present
+      login_user: postgres
+      login_password: "{{ passwd.postgresql.postgres }}"
+    become: yes
+    become_user: postgres
+    become_method: su
+
+  - import_role:
+      name: service.summary
+
+  handlers:
+  - name: Restart Postgres
+    ansible.builtin.systemd_service:
+      name: "postgresql@{{ postgres.version }}-{{ postgres.cluster }}"
+      state: restarted
+
+  vars:
+    postgres:
+      version: 17
+      cluster: main
+      conf_dir: "/etc/postgresql/{{ postgres.version }}/{{ postgres.cluster }}"
+
+    services:
+    - name: Postgres Database
+      desc: "Main database connection to Postgres RDBMS server"
+      ports: 5432/tcp
+    - name: PhpPgAdmin
+      desc: "Web-based administration tool for Postgres"
+      url: "http://{{ ansible_fqdn }}/phppgadmin"

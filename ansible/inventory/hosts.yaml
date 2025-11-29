@@ -10,6 +10,7 @@ proxmox_hosted:
       hosts:
         filer:
         auth:
+        db:
 ungrouped:
   hosts:
     power:
