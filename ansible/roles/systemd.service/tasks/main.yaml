@@ -1,7 +1,7 @@
 
 - name: Install service unit file
   ansible.builtin.copy:
-    src: "{{ service_name }}.service"
+    src: "conf/systemd/{{ service_name }}.service"
     dest: /etc/systemd/system
 
 - name: Register service with systemd

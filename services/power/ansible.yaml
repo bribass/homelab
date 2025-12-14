@@ -72,7 +72,7 @@
 
   - name: Systemd unit for wolnut
     import_role:
-      name: local.systemd
+      name: systemd.service
     vars:
       service_name: wolnut
     notify: Restart wolnut

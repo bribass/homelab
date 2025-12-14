@@ -111,7 +111,7 @@
 
   - name: Systemd unit for Dropbox
     import_role:
-      name: local.systemd
+      name: systemd.service
     vars:
       service_name: dropbox
     notify: Restart Dropbox
