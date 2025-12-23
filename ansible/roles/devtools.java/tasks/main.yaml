@@ -1,0 +1,26 @@
+- name: Load platform configuration for {{ ansible_os_family }}
+  include_vars: "{{ lookup('ansible.builtin.first_found', lookup_params) }}"
+  vars:
+    lookup_params:
+      files:
+      - "platform.{{ ansible_os_family }}-{{ ansible_architecture }}.yaml"
+      - "platform.{{ ansible_os_family }}.yaml"
+      paths:
+      - "vars"
+
+- name: Create local cache directory for package files
+  ansible.builtin.file:
+    path: "{{ cache_dir }}"
+    mode: "0755"
+    state: directory
+
+- name: Create root installation directory for Java distributions
+  ansible.builtin.file:
+    path: "{{ java_dir }}"
+    mode: "0755"
+    state: directory
+
+- name: Install Java
+  include_tasks: install.{{ ansible_os_family }}.yaml
+  loop: "{{ java_versions }}"
+

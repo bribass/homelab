@@ -1,0 +1,17 @@
+- name: Download Java {{ item }} distribution archive to cache
+  ansible.windows.win_get_url:
+    url: "https://api.adoptium.net/v3/binary/latest/{{ item }}/ga/{{ java_os }}/{{ java_arch }}/{{ java_type }}/hotspot/normal/eclipse"
+    dest: "{{ cache_dir }}"
+  register: java_dl
+
+- name: Determine unpack directory of Java {{ item }} distribution archive
+  ansible.builtin.set_fact:
+    java_unpack_toplevel: "{{ java_dl.dest | ansible.builtin.regex_search('(?<=_)[0-9._]+(?=\\.)') | ansible.builtin.replace('_', '+') }}"
+
+- name: Unpack Java {{ item }} distribution archive
+  community.windows.win_unzip:
+    src: "{{ java_dl.dest }}"
+    dest: "{{ java_dir }}"
+    remote_src: true
+    creates: "{{ java_dir }}/{{ java_type }}-{{ java_unpack_toplevel }}"
+

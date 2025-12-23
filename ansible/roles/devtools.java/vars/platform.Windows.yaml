@@ -1,0 +1,5 @@
+cache_dir: "C:\\Ansible Cache"
+java_dir: "C:\\Program Files\\Java"
+java_os: windows
+java_arch: x64
+

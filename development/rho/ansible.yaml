@@ -1,0 +1,10 @@
+- hosts: rho
+  tasks:
+  - import_role:
+      name: devtools.java
+    vars:
+      java_versions:
+      - "17"
+      - "21"
+      - "25"
+

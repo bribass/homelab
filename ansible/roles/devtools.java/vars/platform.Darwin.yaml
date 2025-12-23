@@ -1,0 +1,5 @@
+cache_dir: "/Volumes/Dock/Ansible Cache"
+java_dir: "/Library/Java/JavaVirtualMachines"
+java_os: mac
+java_arch: aarch64
+

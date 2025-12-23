@@ -11,6 +11,13 @@ proxmox_hosted:
         filer:
         auth:
         db:
+development:
+  hosts:
+    alpha:
+    rho:
+    mu:
+    pi:
+    epsilon:
 ungrouped:
   hosts:
     power:

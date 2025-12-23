@@ -1,0 +1,9 @@
+- hosts: pi
+  tasks:
+  - import_role:
+      name: devtools.java
+    vars:
+      java_versions:
+      - "21"
+      - "25"
+
