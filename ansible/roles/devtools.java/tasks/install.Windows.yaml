@@ -1,6 +1,24 @@
+- name: Create local cache directory for package files
+  ansible.windows.win_file:
+    path: "{{ cache_dir }}"
+    state: directory
+
+- name: Create root installation directory for Java distributions
+  ansible.windows.win_file:
+    path: "{{ java_dir }}"
+    state: directory
+
+- name: Determine Java {{ item }} distribution archive file name
+  ansible.windows.win_uri:
+    url: "https://api.adoptium.net/v3/binary/latest/{{ item }}/ga/{{ java_os }}/{{ java_arch }}/{{ java_type }}/hotspot/normal/eclipse"
+    method: HEAD
+    follow_redirects: none
+    status_code: 307
+  register: java_dl_filename
+
 - name: Download Java {{ item }} distribution archive to cache
   ansible.windows.win_get_url:
-    url: "https://api.adoptium.net/v3/binary/latest/{{ item }}/ga/{{ java_os }}/{{ java_arch }}/{{ java_type }}/hotspot/normal/eclipse"
+    url: "{{ java_dl_filename.location }}"
     dest: "{{ cache_dir }}"
   register: java_dl
 

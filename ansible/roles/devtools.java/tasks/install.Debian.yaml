@@ -1,3 +1,15 @@
+- name: Create local cache directory for package files
+  ansible.builtin.file:
+    path: "{{ cache_dir }}"
+    mode: "0755"
+    state: directory
+
+- name: Create root installation directory for Java distributions
+  ansible.builtin.file:
+    path: "{{ java_dir }}"
+    mode: "0755"
+    state: directory
+
 - name: Download Java {{ item }} distribution archive to cache
   ansible.builtin.get_url:
     url: "https://api.adoptium.net/v3/binary/latest/{{ item }}/ga/{{ java_os }}/{{ java_arch }}/{{ java_type }}/hotspot/normal/eclipse"

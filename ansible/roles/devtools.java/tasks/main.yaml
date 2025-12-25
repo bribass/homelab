@@ -8,19 +8,7 @@
       paths:
       - "vars"
 
-- name: Create local cache directory for package files
-  ansible.builtin.file:
-    path: "{{ cache_dir }}"
-    mode: "0755"
-    state: directory
-
-- name: Create root installation directory for Java distributions
-  ansible.builtin.file:
-    path: "{{ java_dir }}"
-    mode: "0755"
-    state: directory
-
-- name: Install Java
+- name: Install Java for {{ ansible_os_family }}
   include_tasks: install.{{ ansible_os_family }}.yaml
   loop: "{{ java_versions }}"
 
