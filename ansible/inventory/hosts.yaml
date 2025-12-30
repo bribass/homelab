@@ -15,6 +15,13 @@ development:
   hosts:
     alpha:
     rho:
+    rho-win11:
+      ansible_connection: winrm
+      ansible_host: rho
+      ansible_port: 59850
+      ansible_winrm_scheme: http
+      ansible_winrm_transport: ntlm
+      ansible_winrm_server_cert_validation: ignore
     mu:
     pi:
     epsilon:
