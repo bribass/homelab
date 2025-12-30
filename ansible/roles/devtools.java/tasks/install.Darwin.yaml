@@ -30,3 +30,27 @@
     - "{{ java_dir }}"
     creates: "{{ java_dir }}/{{ java_type }}-{{ java_unpack_toplevel }}"
 
+- name: Create environment script directory
+  ansible.builtin.file:
+    path: "{{ env_script_dir }}"
+    mode: "0755"
+    state: directory
+
+- name: Set up Java {{ item }} environment script
+  ansible.builtin.template:
+    src: env.Darwin.j2
+    dest: "{{ env_script_dir }}/java-{{ item }}"
+    owner: root
+    group: wheel
+    mode: "0755"
+
+- name: Configure iTerm2 with java {{ item }} environment script
+  include_role:
+    name: devtools.envscript
+    tasks_from: env.Darwin.yaml
+  vars:
+    env_script: "java-{{ item }}"
+    env_icon: java
+    env_icon_file: "{{ lookup('ansible.builtin.fileglob', 'java.svg') }}"
+    env_name: "Java {{ item }}"
+

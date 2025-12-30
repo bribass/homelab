@@ -1,0 +1,12 @@
+{
+  "profiles":
+  [
+    {
+      "guid": "{{ lookup('win_terminal_fragment_guid', 'Ansible_DevTools', env_name) }}",
+      "name": "{{ env_name }}",
+      "commandline": "%SystemRoot%\\System32\\cmd.exe /k {{ env_script_dir | regex_replace('\\\\{1}', '\\\\\\\\') }}\\{{ env_script }}.bat",
+      "icon": "{{ env_win_fragment_dir | regex_replace('\\\\{1}', '\\\\\\\\') }}\\{{ env_icon }}.png",
+    }
+  ]
+}
+

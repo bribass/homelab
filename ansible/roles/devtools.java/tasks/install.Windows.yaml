@@ -33,3 +33,23 @@
     remote_src: true
     creates: "{{ java_dir }}/{{ java_type }}-{{ java_unpack_toplevel }}"
 
+- name: Create environment script directory
+  ansible.windows.win_file:
+    path: "{{ env_script_dir }}"
+    state: directory
+
+- name: Set up Java {{ item }} environment script
+  ansible.windows.win_template:
+    src: env.Windows.j2
+    dest: "{{ env_script_dir }}/java-{{ item }}.bat"
+
+- name: Configure Windows Terminal with Java {{ item }} environment script
+  include_role:
+    name: devtools.envscript
+    tasks_from: env.Windows.yaml
+  vars:
+    env_script: "java-{{ item }}"
+    env_icon: java
+    env_icon_file: "{{ lookup('ansible.builtin.fileglob', 'java.svg') }}"
+    env_name: "Java {{ item }}"
+

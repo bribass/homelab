@@ -1,0 +1,5 @@
+env_linux_konsole_dir: /usr/local/share/konsole
+env_linux_icon_dir: /usr/local/share/icons
+env_win_fragment_dir: "C:\\ProgramData\\Microsoft\\Windows Terminal\\Fragments\\Ansible_DevTools"
+env_mac_iterm2_profiles_dir: "/Users/brian/Library/Application Support/iTerm2/DynamicProfiles"
+env_mac_icon_dir: "/Volumes/Dock/DevTools/Icons"

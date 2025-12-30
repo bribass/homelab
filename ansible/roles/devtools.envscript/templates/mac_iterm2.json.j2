@@ -1,0 +1,13 @@
+{
+  "Profiles": [
+    {
+      "Name": "{{ env_name }}",
+      "Subtitle": "{{ env_name }}",
+      "Guid": "{{ lookup('win_terminal_fragment_guid', 'Ansible_DevTools', env_name, braces=False) }}",
+      "Dynamic Profile Parent Name": "Default",
+      "Initial Text": "source {{ env_script_dir }}/{{ env_script }}",
+      "Icon": 2,
+      "Custom Icon Path": "{{ env_mac_icon_dir }}/{{ env_icon }}.icns",
+    }
+  ]
+}

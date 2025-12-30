@@ -27,3 +27,27 @@
     remote_src: true
     creates: "{{ java_dir }}/{{ java_type }}-{{ java_unpack_toplevel }}"
 
+- name: Create environment script directory
+  ansible.builtin.file:
+    path: "{{ env_script_dir }}"
+    mode: "0755"
+    state: directory
+
+- name: Set up Java {{ item }} environment script
+  ansible.builtin.template:
+    src: env.Debian.j2
+    dest: "{{ env_script_dir }}/java-{{ item }}"
+    owner: root
+    group: root
+    mode: '0755'
+
+- name: Configure Konsole with java {{ item }} environment script
+  include_role:
+    name: devtools.envscript
+    tasks_from: env.Debian.yaml
+  vars:
+    env_script: "java-{{ item }}"
+    env_icon: java
+    env_icon_file: "{{ lookup('ansible.builtin.fileglob', 'java.svg') }}"
+    env_name: "Java {{ item }}"
+
