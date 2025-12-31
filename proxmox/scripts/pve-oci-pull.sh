@@ -90,7 +90,7 @@ fi
 
 # Download the OCI image to the node
 ADDITIONAL_OPTIONS=()
-if [ ! -z "$PVE_FILENAME" ]; then
+if [ -n "$PVE_FILENAME" ]; then
   ADDITIONAL_OPTIONS+=("--data-urlencode" "filename=${PVE_FILENAME}")
 fi
 UPID_PULL=$(curl -sk "${AUTH_OPTIONS[@]}" -X POST \
