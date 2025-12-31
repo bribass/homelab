@@ -1,13 +1,14 @@
 #!/bin/bash
 
 # Process command line options
-if ! OPTS=$(getopt -o H:P:u:h -l host,port,user,help -n "$0" -- "$@"); then
+if ! OPTS=$(getopt -o H:P:u:lh -l host:,port:,user:,line,help -n "$0" -- "$@"); then
   exit 1
 fi
 eval set -- "$OPTS"
 PVE_HOST=""
 PVE_PORT=8006
 PVE_USER=""
+LINE_ORIENTED="no"
 while true; do
   case "$1" in
     -H | --host)
@@ -22,14 +23,19 @@ while true; do
       PVE_USER="$2"
       shift 2
       ;;
+    -l | --line)
+      LINE_ORIENTED="yes"
+      shift
+      ;;
     -h | --help)
-      echo "Usage: $0 [-H|--host HOST] [-P|--port PORT] [-u|--user USER] [-h|--help]"
+      echo "Usage: $0 [-H|--host HOST] [-P|--port PORT] [-u|--user USER] [-l|--line] [-h|--help]"
       echo "Log in to a Proxmox PVE server and print curl options for authenticating with that session."
       echo ""
       echo "Options:"
       echo "  -H, --host HOST  Hostname of PVE server to log in to"
       echo "  -P, --port PORT  Port of PVE server to log in to (default 8006)"
       echo "  -u, --user USER  Username and realm (name@realm) to log in as"
+      echo "  -l, --line       Output curl options in a line-oriented way"
       echo "  -h, --help       Display this help message"
       exit 0
       ;;
@@ -53,20 +59,22 @@ if [ -z "$PVE_USER" ]; then
   exit 1
 fi
 
-# Read in password
-echo -n "Enter password for $PVE_USER: " >&2
-read -rs PVE_PASS
-echo "" >&2
-
-# Get login ticket and CSRF token
-RESPONSE=$(mktemp -u "${TMPDIR:-/tmp}/pve-XXXXXXXXXX.json")
-# shellcheck disable=SC2064
-trap "rm -f $RESPONSE" EXIT
-PVE_URL_BASE="https://${PVE_HOST}:${PVE_PORT}/api2/json/"
-curl -sk --data "username=${PVE_USER}" --data-urlencode "password=${PVE_PASS}" "${PVE_URL_BASE}access/ticket" >"${RESPONSE}"
-LOGIN_TICKET=$(jq --raw-output .data.ticket "${RESPONSE}")
-CSRF_TOKEN=$(jq --raw-output .data.CSRFPreventionToken "${RESPONSE}")
+# Do the login
+pve_login "$PVE_HOST" "$PVE_PORT" "$PVE_USER" AUTH_OPTIONS
 
 # Print the curl command line options
-echo "--cookie PVEAuthCookie=${LOGIN_TICKET} --header \"CSRFPreventionToken: ${CSRF_TOKEN}\""
+if [ "$LINE_ORIENTED" = "yes" ]; then
+  for i in "${AUTH_OPTIONS[@]}"; do
+    echo "$i"
+  done
+else
+  for i in "${AUTH_OPTIONS[@]}"; do
+    if [[ "$i" =~ " " ]]; then
+      echo -n "\"$i\" "
+    else
+      echo -n "$i "
+    fi
+  done
+  echo ""
+fi
 exit 0
