@@ -6,7 +6,7 @@ if ! OPTS=$(getopt -o H:P:u:lh -l host:,port:,user:,line,help -n "$0" -- "$@"); 
 fi
 eval set -- "$OPTS"
 PVE_HOST=""
-PVE_PORT=8006
+PVE_PORT="8006"
 PVE_USER=""
 LINE_ORIENTED="no"
 while true; do
@@ -25,7 +25,7 @@ while true; do
       ;;
     -l | --line)
       LINE_ORIENTED="yes"
-      shift
+      shift 1
       ;;
     -h | --help)
       echo "Usage: $0 [-H|--host HOST] [-P|--port PORT] [-u|--user USER] [-l|--line] [-h|--help]"

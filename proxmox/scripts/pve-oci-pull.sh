@@ -3,13 +3,13 @@
 BASE_DIR=$(dirname "$0")
 source "${BASE_DIR}/pve-functions.sh"
 
-# Process comamnd line options
+# Process command line options
 if ! OPTS=$(getopt -o H:P:u:s:f:h -l host:,port:,user:,storage:,filename:,help -n "$0" -- "$@"); then
   exit 1
 fi
 eval set -- "$OPTS"
 PVE_HOST=""
-PVE_PORT=8006
+PVE_PORT="8006"
 PVE_USER=""
 PVE_STORAGE=""
 PVE_FILENAME=""

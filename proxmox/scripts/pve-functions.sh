@@ -11,6 +11,8 @@ function pve_login {
   local PVE_PORT="$2"
   local PVE_USER="$3"
 
+  local PVE_URL_BASE="https://${PVE_HOST}:${PVE_PORT}/api2/json/"
+
   # Read in password
   echo -n "Enter password for $PVE_USER: " >&2
   read -rs PVE_PASS
@@ -21,7 +23,6 @@ function pve_login {
   RESPONSE=$(mktemp -u "${TMPDIR:-/tmp}/pve-XXXXXXXXXX.json")
   # shellcheck disable=SC2064
   trap "rm -f $RESPONSE" EXIT
-  local PVE_URL_BASE="https://${PVE_HOST}:${PVE_PORT}/api2/json/"
   curl -sk --data "username=${PVE_USER}" --data-urlencode "password=${PVE_PASS}" "${PVE_URL_BASE}access/ticket" >"${RESPONSE}"
   local LOGIN_TICKET CSRF_TOKEN
   LOGIN_TICKET=$(jq --raw-output .data.ticket "${RESPONSE}")
@@ -52,9 +53,9 @@ function pve_upid_logs {
   local PVE_POLL_SEC="$6"
 
   local PVE_URL_BASE="https://${PVE_HOST}:${PVE_PORT}/api2/json/"
-  local STATUS
 
   # Poll to see when the task is complete
+  local STATUS
   while true; do
     sleep "${PVE_POLL_SEC}"
     STATUS=$(curl -sk "${PVE_AUTH[@]}" "${PVE_URL_BASE}nodes/${PVE_NODE}/tasks/${PVE_UPID}/status" | jq --raw-output .data.status)
