@@ -33,6 +33,22 @@
       line: "listen_addresses = '*'"
     notify: Restart Postgres
 
+  - name: Configure Postgres for logging connections
+    ansible.builtin.lineinfile:
+      path: "{{ postgres.conf_dir }}/postgresql.conf"
+      state: present
+      regexp: log_connections
+      line: "log_connections = on"
+    notify: Restart Postgres
+
+  - name: Configure Postgres for logging disconnections
+    ansible.builtin.lineinfile:
+      path: "{{ postgres.conf_dir }}/postgresql.conf"
+      state: present
+      regexp: log_disconnections
+      line: "log_disconnections = on"
+    notify: Restart Postgres
+
   - name: Configure Postgres for authentication
     community.postgresql.postgresql_pg_hba:
       dest: "{{ postgres.conf_dir }}/pg_hba.conf"
