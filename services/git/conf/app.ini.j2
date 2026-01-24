@@ -25,7 +25,7 @@ APP_DATA_PATH = {{ gitea.work_dir }}/data
 DISABLE_SSH = false
 SSH_PORT = 22
 LFS_START_SERVER = true
-LFS_JWT_SECRET = B70IG8pKLFy_SvYkC3Irz3Cm8RStAfo4JhpIJ9yx-lw
+LFS_JWT_SECRET = {{ passwd.gitea.lfs_secret }}
 OFFLINE_MODE = true
 MINIMUM_KEY_SIZE_CHECK = false
 
@@ -70,8 +70,8 @@ DEFAULT_TRUST_MODEL = committer
 
 [security]
 INSTALL_LOCK = true
-INTERNAL_TOKEN = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYmYiOjE3NjkyMTcyODR9.Dn2jfERb_BfYojFozryV5JD58NXrcBv-J4WxP-1vXWU
+INTERNAL_TOKEN = {{ passwd.gitea.internal_token }}
 PASSWORD_HASH_ALGO = pbkdf2
 
 [oauth2]
-JWT_SECRET = jD4dNFe-WjXLaWEZWDZsxt5xDvSNlGtp7Qdu0Xe4aYw
+JWT_SECRET = {{ passwd.gitea.jwt_secret }}
