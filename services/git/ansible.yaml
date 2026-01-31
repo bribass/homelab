@@ -50,6 +50,9 @@
       service_name: gitea
     notify: Restart Gitea
 
+  - import_role:
+      name: service.summary
+
   handlers:
   - name: Restart Gitea
     ansible.builtin.systemd_service:
@@ -60,3 +63,8 @@
     gitea:
       version: 1.25.4
       work_dir: /var/lib/gitea
+
+    services:
+    - name: Gitea
+      desc: "Git repository hosting"
+      url: "http://{{ ansible_fqdn }}/"
