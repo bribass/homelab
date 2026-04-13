@@ -52,7 +52,7 @@ configures all services required for the host to fulfill it's purpose.
 
     To decrypt individual passwords outside of a playbook, simply pipe them through `ansible-vault decrypt`:
     ```
-    $ yq '.passwd.auth.mgr' ansible/inventory/group_vars/all | ansible-vault decrypt
+    $ yq -r '.passwd.auth.mgr' ansible/inventory/group_vars/all | ansible-vault decrypt
     Vault password: *****
     Decryption successful
     [[ password printed on standard output ]]

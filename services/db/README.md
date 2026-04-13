@@ -18,6 +18,13 @@ Because all user accounts in Postgres (with the exception of the default `postgr
    ```shell
    pg_ldap_sync -vvv
    ```
+   
+### Create new database
+
+1. As `postgres` in the container, run `psql`.  In the Postgres shell, run the query:
+   ```postgresql
+   create database :dbname with owner :username;
+   ```
 
 ## References
 
