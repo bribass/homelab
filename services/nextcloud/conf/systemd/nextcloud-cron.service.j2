@@ -1,0 +1,8 @@
+[Unit]
+Description=NextCloud cron.php job
+
+[Service]
+User={{ apache.user }}
+ExecCondition=php -f {{ nextcloud.install_dir }}/nextcloud/occ status -e
+ExecStart=/usr/bin/php -f {{ nextcloud.install_dir }}/nextcloud/cron.php
+KillMode=process

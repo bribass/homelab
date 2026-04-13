@@ -12,6 +12,7 @@ proxmox_hosted:
         auth:
         db:
         git:
+        nextcloud:
 development:
   hosts:
     alpha:
@@ -29,4 +30,7 @@ development:
 ungrouped:
   hosts:
     power:
-
+tailscale:
+  hosts:
+    omega:
+    nextcloud:

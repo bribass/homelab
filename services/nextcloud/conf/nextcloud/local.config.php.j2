@@ -1,0 +1,31 @@
+<?php
+$CONFIG = [
+  // Pretty URLs (https://docs.nextcloud.com/server/stable/admin_manual/installation/source_installation.html#pretty-urls)
+  'htaccess.RewriteBase' => '/nextcloud',
+  'overwrite.cli.url' => 'http://{{ ansible_fqdn }}/nextcloud',
+
+  // Memory Caching (https://docs.nextcloud.com/server/stable/admin_manual/configuration_server/caching_configuration.html)
+  'memcache.local' => '\OC\Memcache\APCu',
+
+  // Trusted Domains (https://docs.nextcloud.com/server/stable/admin_manual/installation/installation_wizard.html#trusted-domains)
+  'trusted_domains' => [
+    '{{ ansible_fqdn }}',
+    '{{ ansible_hostname }}.{{ tailscale.tailnet_name }}',
+{% for addr in ansible_all_ipv4_addresses %}
+    '{{ addr }}',
+{% endfor %}
+  ],
+
+  // System defaults
+  'default_language' => 'en',
+  'default_locale' => 'en_US',
+  'default_phone_region' => 'US',
+  'default_timezone' => 'America/Los_Angeles',
+  'lost_password_link' => 'http://auth.h.bbassett.net/reset',
+
+  // Disable SMTP
+  'mail_smtpmode' => 'null',
+
+  // Disable web updater; updates managed via Ansible
+  'upgrade.disable-web' => true,
+];

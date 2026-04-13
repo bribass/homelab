@@ -1,0 +1,22 @@
+
+- name: Install '{{ timer_name }}' timer service unit file
+  ansible.builtin.template:
+    src: "conf/systemd/{{ timer_name }}.service.j2"
+    dest: "/etc/systemd/system/{{ timer_name }}.service"
+    owner: root
+    group: root
+    mode: '0644'
+
+- name: Install '{{ timer_name }}' timer unit file
+  ansible.builtin.template:
+    src: "conf/systemd/{{ timer_name }}.timer.j2"
+    dest: "/etc/systemd/system/{{ timer_name }}.timer"
+    owner: root
+    group: root
+    mode: '0644'
+
+- name: Register timer with systemd
+  ansible.builtin.systemd_service:
+    name: "{{ timer_name }}.timer"
+    daemon_reload: true
+    enabled: true
