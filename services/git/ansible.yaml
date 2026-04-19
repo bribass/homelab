@@ -1,63 +1,67 @@
-- hosts: git
+- name: Desired state configuration for 'git'
+  hosts: git
   tasks:
-  - import_role:
-      name: auth.ldap
+    - name: Configure system for LDAP authentication
+      ansible.builtin.import_role:
+        name: auth.ldap
 
-  - name: Install packages from Debian
-    ansible.builtin.apt:
-      update_cache: true
-      install_recommends: false
-      name:
-      - git
-      - git-lfs
-      - sqlite3
-      state: present
+    - name: Install packages from Debian
+      ansible.builtin.apt:
+        update_cache: true
+        install_recommends: false
+        name:
+          - git
+          - git-lfs
+          - sqlite3
+        state: present
 
-  - name: Download binary from Gitea
-    ansible.builtin.get_url:
-      url: "https://dl.gitea.com/gitea/{{ gitea.version }}/gitea-{{ gitea.version }}-linux-amd64"
-      dest: /usr/local/bin/gitea
-      owner: root
-      group: root
-      mode: '0755'
-    notify: Restart Gitea
+    - name: Download binary from Gitea
+      ansible.builtin.get_url:
+        url: "https://dl.gitea.com/gitea/{{ gitea.version }}/gitea-{{ gitea.version }}-linux-amd64"
+        dest: /usr/local/bin/gitea
+        owner: root
+        group: root
+        mode: '0755'
+      notify: Restart Gitea
 
-  - name: Create required directory structure for Gitea
-    ansible.builtin.file:
-      path: "{{ gitea.work_dir }}/{{ item }}"
-      owner: git
-      group: service
-      mode: '0755'
-      state: directory
-    loop:
-      - data
-      - log
-      - custom
-      - custom/conf
+    - name: Create required directory structure for Gitea
+      ansible.builtin.file:
+        path: "{{ gitea.work_dir }}/{{ item }}"
+        owner: git
+        group: service
+        mode: '0755'
+        state: directory
+      loop:
+        - data
+        - log
+        - custom
+        - custom/conf
 
-  - name: Configure Gitea
-    ansible.builtin.template:
-      src: conf/app.ini.j2
-      dest: "{{ gitea.work_dir }}/custom/conf/app.ini"
-      owner: git
-      group: service
-      mode: '0644'
-    notify: Restart Gitea
+    - name: Configure Gitea
+      ansible.builtin.template:
+        src: conf/app.ini.j2
+        dest: "{{ gitea.work_dir }}/custom/conf/app.ini"
+        owner: git
+        group: service
+        mode: '0644'
+      notify: Restart Gitea
 
-  - import_role:
-      name: systemd.service
-    vars:
-      service_name: gitea
-    notify: Restart Gitea
+    - name: Register SystemD service for Gitea
+      ansible.builtin.import_role:
+        name: systemd.service
+      vars:
+        service_name: gitea
+      notify: Restart Gitea
 
-  - import_role:
-      name: service.summary
+    - name: Summarize services
+      ansible.builtin.import_role:
+        name: service.summary
 
   handlers:
-  - name: Restart Gitea
-    ansible.builtin.systemd_service:
-      name: gitea
-      state: restarted
+    - name: Restart Gitea
+      ansible.builtin.systemd_service:
+        name: gitea
+        state: restarted
 
   vars:
     gitea:
@@ -65,6 +69,6 @@
       work_dir: /var/lib/gitea
 
     services:
-    - name: Gitea
-      desc: "Git repository hosting"
-      url: "http://{{ ansible_fqdn }}/"
+      - name: Gitea
+        desc: "Git repository hosting"
+        url: "http://{{ ansible_fqdn }}/"

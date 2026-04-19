@@ -1,9 +1,10 @@
-- hosts: mu
+- name: Desired state configuration for 'mu'
+  hosts: mu
   tasks:
-  - import_role:
-      name: devtools.java
-    vars:
-      java_versions:
-      - "21"
-      - "25"
-
+    - name: Install Java
+      ansible.builtin.import_role:
+        name: devtools.java
+      vars:
+        java_versions:
+          - "21"
+          - "25"

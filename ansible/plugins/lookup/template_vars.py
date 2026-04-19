@@ -33,8 +33,6 @@ from ansible.plugins.lookup import LookupBase
 from ansible.template import trust_as_template
 from ansible.utils.display import Display
 import jinja2, jinja2.meta
-import traceback
-
 
 display = Display()
 

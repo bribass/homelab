@@ -1,81 +1,86 @@
-- hosts: filer
+- name: Desired state configuration for 'filer'
+  hosts: filer
   tasks:
-  - import_role:
-      name: auth.ldap
+    - name: Configure system for LDAP authentication
+      ansible.builtin.import_role:
+        name: auth.ldap
 
-  - import_role:
-      name: install.cockpit
+    - name: Install Cockpit
+      ansible.builtin.import_role:
+        name: install.cockpit
 
-  - name: Install Cockpit extensions from GitHub
-    include_role: 
-      name: install.deb_from_github
-    vars:
-      github: "{{ item.value }}"
-    loop: "{{ versions | dict2items }}"
-    loop_control:
-      label: "{{ item.value.package_name }}"
+    - name: Install Cockpit extensions from GitHub
+      ansible.builtin.include_role:
+        name: install.deb_from_github
+      vars:
+        github: "{{ item.value }}"
+      loop: "{{ versions | dict2items }}"
+      loop_control:
+        label: "{{ item.value.package_name }}"
 
-  - name: Install packages from Debian
-    ansible.builtin.apt:
-      update_cache: true
-      install_recommends: false
-      name:
-      - samba
-      - nfs-kernel-server
-      state: present
+    - name: Install packages from Debian
+      ansible.builtin.apt:
+        update_cache: true
+        install_recommends: false
+        name:
+          - samba
+          - nfs-kernel-server
+        state: present
 
-  - name: Configure Samba
-    ansible.builtin.template:
-      src: conf/smb/smb.conf.j2
-      dest: /etc/samba/smb.conf
-      owner: root
-      group: root
-      mode: '0644'
-    notify: Restart Samba
+    - name: Configure Samba
+      ansible.builtin.template:
+        src: conf/smb/smb.conf.j2
+        dest: /etc/samba/smb.conf
+        owner: root
+        group: root
+        mode: '0644'
+      notify: Restart Samba
 
-  - name: Set Samba admin LDAP bind password
-    ansible.builtin.command:
-      cmd: /usr/bin/smbpasswd -W
-      stdin: |
-        {{ passwd.auth.mgr }}
-        {{ passwd.auth.mgr }}
+    - name: Set Samba admin LDAP bind password
+      ansible.builtin.command:
+        cmd: /usr/bin/smbpasswd -W
+        stdin: |
+          {{ passwd.auth.mgr }}
+          {{ passwd.auth.mgr }}
+        creates: /var/lib/samba/private/secrets.tdb
 
-  - name: Configure NFS
-    ansible.builtin.template:
-      src: conf/nfs/exports.j2
-      dest: /etc/exports
-      owner: root
-      group: root
-      mode: '0644'
-    notify: Restart NFS
+    - name: Configure NFS
+      ansible.builtin.template:
+        src: conf/nfs/exports.j2
+        dest: /etc/exports
+        owner: root
+        group: root
+        mode: '0644'
+      notify: Restart NFS
 
-  - name: Make sure shares exist
-    ansible.builtin.file:
-      path: "{{ item.dir.path }}"
-      state: directory
-      owner: "{{ item.dir.owner }}"
-      group: "{{ item.dir.group }}"
-      mode: "{{ item.dir.mode }}"
-    loop: "{{ shares }}"
-    loop_control:
-      label: "{{ item.name }}"
+    - name: Make sure shares exist
+      ansible.builtin.file:
+        path: "{{ item.dir.path }}"
+        state: directory
+        owner: "{{ item.dir.owner }}"
+        group: "{{ item.dir.group }}"
+        mode: "{{ item.dir.mode }}"
+      loop: "{{ shares }}"
+      loop_control:
+        label: "{{ item.name }}"
 
-  - import_role:
-      name: service.summary
+    - name: Summarize services
+      ansible.builtin.import_role:
+        name: service.summary
 
   handlers:
-  - name: Restart Samba
-    ansible.builtin.systemd_service:
-      name: "{{ item }}"
-      state: restarted
-    loop:
-      - smbd
-      - nmbd
+    - name: Restart Samba
+      ansible.builtin.systemd_service:
+        name: "{{ item }}"
+        state: restarted
+      loop:
+        - smbd
+        - nmbd
 
-  - name: Restart NFS
-    ansible.builtin.systemd_service:
-      name: nfs-server
-      state: restarted
+    - name: Restart NFS
+      ansible.builtin.systemd_service:
+        name: nfs-server
+        state: restarted
 
   vars:
     versions:
@@ -86,67 +91,66 @@
         suffix: "-1focal_all.deb"
 
     shares:
-    - name: media
-      dir:
-        path: /vol/media
-        owner: root
-        group: users
-        mode: '0775'
-      desc: Media files
-      smb:
-        guest: false
-        readonly: false
-        browsable: true
-        inherit: false
-      nfs:
-        fsid: 85f34ef9-6271-4b63-85f7-ddf98ad12f27
-        clients:
-        - hostname: '*'
-          options: rw,sync,no_subtree_check
+      - name: media
+        dir:
+          path: /vol/media
+          owner: root
+          group: users
+          mode: '0775'
+        desc: Media files
+        smb:
+          guest: false
+          readonly: false
+          browsable: true
+          inherit: false
+        nfs:
+          fsid: 85f34ef9-6271-4b63-85f7-ddf98ad12f27
+          clients:
+            - hostname: '*'
+              options: rw,sync,no_subtree_check
 
-    - name: photo
-      dir:
-        path: /vol/photo
-        owner: root
-        group: users
-        mode: '0775'
-      desc: Photos
-      smb:
-        guest: false
-        readonly: false
-        browsable: true
-        inherit: false
-      nfs:
-        fsid: 933a2cc7-6003-11f0-950c-f875a4b2358c
-        clients:
-        - hostname: '*'
-          options: rw,sync,no_subtree_check
+      - name: photo
+        dir:
+          path: /vol/photo
+          owner: root
+          group: users
+          mode: '0775'
+        desc: Photos
+        smb:
+          guest: false
+          readonly: false
+          browsable: true
+          inherit: false
+        nfs:
+          fsid: 933a2cc7-6003-11f0-950c-f875a4b2358c
+          clients:
+            - hostname: '*'
+              options: rw,sync,no_subtree_check
 
-    - name: backup
-      dir:
-        path: /vol/backup
-        owner: backup
-        group: backup
-        mode: '0775'
-      desc: Backups
-      smb:
-        guest: false
-        readonly: true
-        browsable: true
-        inherit: false
-        # additional_config: |
-        #  write list = backup
-      nfs:
-        fsid: 011bdab4-6005-11f0-9bcf-f875a4b2358c
-        clients:
-        - hostname: '*'
-          options: rw,sync,no_subtree_check
+      - name: backup
+        dir:
+          path: /vol/backup
+          owner: backup
+          group: backup
+          mode: '0775'
+        desc: Backups
+        smb:
+          guest: false
+          readonly: true
+          browsable: true
+          inherit: false
+          # additional_config: |
+          #  write list = backup
+        nfs:
+          fsid: 011bdab4-6005-11f0-9bcf-f875a4b2358c
+          clients:
+            - hostname: '*'
+              options: rw,sync,no_subtree_check
 
     services:
-    - name: Windows Networking
-      desc: "Windows native file sharing; provided by SMB"
-      ports: 139/tcp, 445/tcp
-    - name: NFS
-      desc: "UNIX native file sharing; used by Linux"
-      ports: 2049/tcp, 2049/udp, 111/tcp, 111/udp
-
+      - name: Windows Networking
+        desc: "Windows native file sharing; provided by SMB"
+        ports: 139/tcp, 445/tcp
+      - name: NFS
+        desc: "UNIX native file sharing; used by Linux"
+        ports: 2049/tcp, 2049/udp, 111/tcp, 111/udp

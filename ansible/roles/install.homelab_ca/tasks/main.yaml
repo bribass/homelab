@@ -11,4 +11,3 @@
   become: yes
   command: "/usr/sbin/update-ca-certificates"
   when: ansible_distribution == "Debian"
-

@@ -36,7 +36,6 @@ import uuid
 from ansible.plugins.lookup import LookupBase
 from ansible.utils.display import Display
 
-
 display = Display()
 
 
@@ -77,4 +76,3 @@ class LookupModule(LookupBase):
 
         ret = [f"{brace_open}{guid}{brace_close}"]
         return ret
-

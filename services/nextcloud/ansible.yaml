@@ -1,212 +1,219 @@
-- hosts: nextcloud
+- name: Desired state configuration for 'nextcloud'
+  hosts: nextcloud
   tasks:
-  - import_role:
-      name: auth.ldap
+    - name: Configure system for LDAP authentication
+      ansible.builtin.import_role:
+        name: auth.ldap
 
-  - name: Install packages from Debian
-    ansible.builtin.apt:
-      update_cache: true
-      install_recommends: false
-      name:
-      - apache2
-      - php{{ php.version }}
-      - php{{ php.version }}-apcu
-      - php{{ php.version }}-curl
-      - php{{ php.version }}-gd
-      - php{{ php.version }}-imagick
-      - php{{ php.version }}-ldap
-      - php{{ php.version }}-mbstring
-      - php{{ php.version }}-pgsql
-      - php{{ php.version }}-xml
-      - php{{ php.version }}-zip
-      - sudo
-      state: present
+    - name: Install packages from Debian
+      ansible.builtin.apt:
+        update_cache: true
+        install_recommends: false
+        name:
+          - apache2
+          - php{{ php.version }}
+          - php{{ php.version }}-apcu
+          - php{{ php.version }}-curl
+          - php{{ php.version }}-gd
+          - php{{ php.version }}-imagick
+          - php{{ php.version }}-ldap
+          - php{{ php.version }}-mbstring
+          - php{{ php.version }}-pgsql
+          - php{{ php.version }}-xml
+          - php{{ php.version }}-zip
+          - sudo
+        state: present
 
-  - name: Enable Apache modules for NextCloud
-    ansible.builtin.command:
-      cmd: "a2enmod {{ item }}"
-      creates: "/etc/apache2/mods-enabled/{{ item }}.load"
-    loop:
-      - rewrite
-      - headers
-      - env
-      - dir
-      - mime
-    notify: Restart Apache
+    - name: Enable Apache modules for NextCloud
+      ansible.builtin.command:
+        cmd: "a2enmod {{ item }}"
+        creates: "/etc/apache2/mods-enabled/{{ item }}.load"
+      loop:
+        - rewrite
+        - headers
+        - env
+        - dir
+        - mime
+      notify: Restart Apache
 
-  - name: Configure Apache for NextCloud
-    ansible.builtin.template:
-      src: conf/apache/site.conf
-      dest: /etc/apache2/sites-available/nextcloud.conf
-      owner: root
-      group: root
-      mode: '0644'
-    notify: Restart Apache
+    - name: Configure Apache for NextCloud
+      ansible.builtin.template:
+        src: conf/apache/site.conf
+        dest: /etc/apache2/sites-available/nextcloud.conf
+        owner: root
+        group: root
+        mode: '0644'
+      notify: Restart Apache
 
-  - name: Enable Apache site for NextCloud
-    ansible.builtin.command:
-      cmd: "a2ensite nextcloud"
-      creates: /etc/apache2/sites-enabled/nextcloud.conf
-    notify: Restart Apache
+    - name: Enable Apache site for NextCloud
+      ansible.builtin.command:
+        cmd: "a2ensite nextcloud"
+        creates: /etc/apache2/sites-enabled/nextcloud.conf
+      notify: Restart Apache
 
-  - name: Configure PHP for NextCloud
-    ansible.builtin.template:
-      src: conf/php/site.ini
-      dest: "/etc/php/{{ php.version }}/{{ item }}/conf.d/99-site.ini"
-      owner: root
-      group: root
-      mode: '0644'
-    notify: Restart Apache
-    loop:
-      - apache2
-      - cli
+    - name: Configure PHP for NextCloud
+      ansible.builtin.template:
+        src: conf/php/site.ini
+        dest: "/etc/php/{{ php.version }}/{{ item }}/conf.d/99-site.ini"
+        owner: root
+        group: root
+        mode: '0644'
+      notify: Restart Apache
+      loop:
+        - apache2
+        - cli
 
-  - name: Install NextCloud
-    block:
-      - name: "Install NextCloud : Create local cache directory for archive files"
-        ansible.builtin.file:
-          path: "{{ download.cache_dir }}"
-          state: directory
-          mode: "0755"
+    - name: Install NextCloud
+      block:
+        - name: "Install NextCloud : Create local cache directory for archive files"
+          ansible.builtin.file:
+            path: "{{ download.cache_dir }}"
+            state: directory
+            mode: "0755"
 
-      - name: "Install NextCloud : Download NextCloud archive to cache"
-        ansible.builtin.get_url:
-          url: "https://github.com/nextcloud-releases/server/releases/download/v{{ nextcloud.version }}/nextcloud-{{ nextcloud.version }}.tar.bz2"
-          dest: "{{ download.cache_dir }}/nextcloud-{{ nextcloud.version }}.tar.bz2"
+        - name: "Install NextCloud : Download NextCloud archive to cache"
+          ansible.builtin.get_url:
+            url: "https://github.com/nextcloud-releases/server/releases/download/v{{ nextcloud.version }}/nextcloud-{{ nextcloud.version }}.tar.bz2"
+            dest: "{{ download.cache_dir }}/nextcloud-{{ nextcloud.version }}.tar.bz2"
+            user: root
+            group: root
+            mode: '0644'
 
-      - name: "Install NextCloud : Check current version"
-        block:
-        - name: "Install NextCloud : Check current version : Read version file"
-          php_variables:
-            path: "{{ nextcloud.install_dir }}/nextcloud/version.php"
-            variables:
-              - "$OC_VersionString"
-          register: nc_version_file
-          
-        - name: "Install NextCloud : Check current version : Parse version file"
+        - name: "Install NextCloud : Check current version"
+          block:
+            - name: "Install NextCloud : Check current version : Read version file"
+              php_variables:
+                path: "{{ nextcloud.install_dir }}/nextcloud/version.php"
+                variables:
+                  - "$OC_VersionString"
+              register: nc_version_file
+
+            - name: "Install NextCloud : Check current version : Parse version file"
+              ansible.builtin.set_fact:
+                nc_version: "{{ nc_version_file.variables.OC_VersionString }}"
+
+          rescue:
+            - name: "Install NextCloud : Check current version : Default for not installed"
+              ansible.builtin.set_fact:
+                nc_version: "0"
+
+        - name: "Install NextCloud : Check if NextCloud is being updated"
           ansible.builtin.set_fact:
-            nc_version: "{{ nc_version_file.variables.OC_VersionString }}"
+            nc_updating: "{{ nc_version != nextcloud.version }}"
+            nc_initial: "{{ nc_version == '0' }}"
 
-        rescue:
-        - name: "Install NextCloud : Check current version : Default for not installed"
-          ansible.builtin.set_fact:
-            nc_version: "0"
+        - name: "Install NextCloud : Unpack NextCloud archive"
+          ansible.builtin.unarchive:
+            src: "{{ download.cache_dir }}/nextcloud-{{ nextcloud.version }}.tar.bz2"
+            remote_src: true
+            dest: "{{ nextcloud.install_dir }}"
+            owner: "{{ apache.user }}"
+            group: "{{ apache.group }}"
+          when: nc_updating
 
-      - name: "Install NextCloud : Check if NextCloud is being updated"
-        ansible.builtin.set_fact:
-          nc_updating: "{{ nc_version != nextcloud.version }}"
-          nc_initial: "{{ nc_version == '0'}}"
+    - name: Configure NextCloud
+      block:
+        - name: "Configure NextCloud : Local configuration file"
+          ansible.builtin.template:
+            src: conf/nextcloud/local.config.php.j2
+            dest: "{{ nextcloud.install_dir }}/nextcloud/config/local.config.php"
+            owner: "{{ apache.user }}"
+            group: "{{ apache.group }}"
+            mode: '0644'
 
-      - name: "Install NextCloud : Unpack NextCloud archive"
-        ansible.builtin.unarchive:
-          src: "{{ download.cache_dir }}/nextcloud-{{ nextcloud.version }}.tar.bz2"
-          remote_src: true
-          dest: "{{ nextcloud.install_dir }}"
-          owner: "{{ apache.user }}"
-          group: "{{ apache.group }}"
-        when: nc_updating
+        - name: "Configure NextCloud : Initial installation"
+          ansible.builtin.command:
+            argv:
+              - php
+              - occ
+              - maintenance:install
+              - --database
+              - pgsql
+              - --database-host
+              - "{{ nextcloud.db.host }}"
+              - --database-name
+              - "{{ nextcloud.db.database }}"
+              - --database-user
+              - "{{ nextcloud.db.user }}"
+              - --database-pass
+              - "{{ nextcloud.db.passwd }}"
+              - --admin-user
+              - initialadmin
+              - --admin-pass
+              - initial
+              - --data-dir
+              - "{{ nextcloud.install_dir }}/data"
+            chdir: "{{ nextcloud.install_dir }}/nextcloud"
+            creates: "{{ nextcloud.install_dir }}/nextcloud/config/config.php"
+          become: true
+          become_user: "{{ apache.user }}"
+          when: nc_initial
 
-  - name: Configure NextCloud
-    block:
-      - name: "Configure NextCloud : Local configuration file"
-        ansible.builtin.template:
-          src: conf/nextcloud/local.config.php.j2
-          dest: "{{ nextcloud.install_dir }}/nextcloud/config/local.config.php"
-          owner: "{{ apache.user }}"
-          group: "{{ apache.group }}"
-          mode: '0644'
+        - name: "Configure NextCloud : Enable LDAP"
+          ansible.builtin.command:
+            argv:
+              - php
+              - occ
+              - app:enable
+              - user_ldap
+            chdir: "{{ nextcloud.install_dir }}/nextcloud"
+            creates: "{{ nextcloud.db.database }}"
+          become: true
+          become_user: "{{ apache.user }}"
+          when: nc_initial
 
-      - name: "Configure NextCloud : Initial installation"
-        ansible.builtin.command:
-          argv:
-            - php
-            - occ
-            - maintenance:install
-            - --database
-            - pgsql
-            - --database-host
-            - "{{ nextcloud.db.host }}"
-            - --database-name
-            - "{{ nextcloud.db.database }}"
-            - --database-user
-            - "{{ nextcloud.db.user }}"
-            - --database-pass
-            - "{{ nextcloud.db.passwd }}"
-            - --admin-user
-            - initialadmin
-            - --admin-pass
-            - initial
-            - --data-dir
-            - "{{ nextcloud.install_dir }}/data"
-        args:
-          chdir: "{{ nextcloud.install_dir }}/nextcloud"
-        become: true
-        become_user: "{{ apache.user }}"
-        when: nc_initial
+        - name: "Configure NextCloud : Create LDAP Config"
+          ansible.builtin.command:
+            argv:
+              - php
+              - occ
+              - ldap:create-empty-config
+            chdir: "{{ nextcloud.install_dir }}/nextcloud"
+            creates: "{{ nextcloud.db.database }}"
+          become: true
+          become_user: "{{ apache.user }}"
+          when: nc_initial
 
-      - name: "Configure NextCloud : Enable LDAP"
-        ansible.builtin.command:
-          argv:
-            - php
-            - occ
-            - app:enable
-            - user_ldap
-        args:
-          chdir: "{{ nextcloud.install_dir }}/nextcloud"
-        become: true
-        become_user: "{{ apache.user }}"
-        when: nc_initial
+        - name: "Configure NextCloud : Configure LDAP"
+          ansible.builtin.command:
+            argv:
+              - php
+              - occ
+              - ldap:set-config
+              - s01
+              - "{{ item.key }}"
+              - "{{ item.value }}"
+            chdir: "{{ nextcloud.install_dir }}/nextcloud"
+            creates: "{{ nextcloud.db.database }}"
+          become: true
+          become_user: "{{ apache.user }}"
+          loop: "{{ nextcloud.config.ldap | dict2items }}"
+          loop_control:
+            label: "{{ item.key }}"
+          when: nc_initial
 
-      - name: "Configure NextCloud : Create LDAP Config"
-        ansible.builtin.command:
-          argv:
-            - php
-            - occ
-            - ldap:create-empty-config
-        args:
-          chdir: "{{ nextcloud.install_dir }}/nextcloud"
-        become: true
-        become_user: "{{ apache.user }}"
-        when: nc_initial
+    #      - name: "Configure NextCloud : Remove local admin user (from initial installation)"
+    #        ansible.builtin.command:
+    #          argv:
+    #            - php
+    #            - occ
+    #            - user:delete
+    #            - initialadmin
+    #          chdir: "{{ nextcloud.install_dir }}/nextcloud"
+    #          removes: "{{ nextcloud.install_dir }}/data/initialadmin"
+    #        become: true
+    #        become_user: "{{ apache.user }}"
+    #        when: nc_initial
 
-      - name: "Configure NextCloud : Configure LDAP"
-        ansible.builtin.command:
-          argv:
-            - php
-            - occ
-            - ldap:set-config
-            - s01
-            - "{{ item.key }}"
-            - "{{ item.value }}"
-        args:
-          chdir: "{{ nextcloud.install_dir }}/nextcloud"
-        become: true
-        become_user: "{{ apache.user }}"
-        loop: "{{ nextcloud.config.ldap | dict2items }}"
-        loop_control:
-          label: "{{ item.key }}"
-        when: nc_initial
+    - name: Register SystemD timer for Nextcloud
+      ansible.builtin.import_role:
+        name: systemd.timer
+      vars:
+        timer_name: nextcloud-cron
 
-#      - name: "Configure NextCloud : Remove local admin user (from initial installation)"
-#        ansible.builtin.command:
-#          argv:
-#            - php
-#            - occ
-#            - user:delete
-#            - initialadmin
-#        args:
-#          chdir: "{{ nextcloud.install_dir }}/nextcloud"
-#        become: true
-#        become_user: "{{ apache.user }}"
-#        when: nc_initial
-
-  - import_role:
-      name: systemd.timer
-    vars:
-      timer_name: nextcloud-cron
-
-  - import_role:
-      name: service.summary
+    - name: Summarize services
+      ansible.builtin.import_role:
+        name: service.summary
 
   handlers:
     - name: Restart Apache
@@ -216,9 +223,9 @@
 
   vars:
     services:
-    - name: NextCloud
-      desc: "NextCloud document system"
-      url: "http://{{ ansible_fqdn }}/nextcloud/"
+      - name: NextCloud
+        desc: "NextCloud document system"
+        url: "http://{{ ansible_fqdn }}/nextcloud/"
 
     download:
       cache_dir: /var/local/cache
@@ -278,4 +285,3 @@
           turnOffCertCheck: '0'
           turnOnPasswordChange: '0'
           useMemberOfToDetectMembership: '1'
-

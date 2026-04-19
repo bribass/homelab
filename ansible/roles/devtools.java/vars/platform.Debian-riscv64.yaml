@@ -4,4 +4,3 @@ java_os: linux
 java_arch: riscv64
 java_env_toplevel: ""
 env_script_dir: /opt/devtools
-

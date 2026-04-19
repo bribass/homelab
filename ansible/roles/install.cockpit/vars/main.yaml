@@ -1,5 +1,4 @@
 services_additional:
-- name: Cockpit
-  desc: "Web-based system administration tool"
-  url: "http://{{ ansible_fqdn }}:9090/"
-
+  - name: Cockpit
+    desc: "Web-based system administration tool"
+    url: "http://{{ ansible_fqdn }}:9090/"

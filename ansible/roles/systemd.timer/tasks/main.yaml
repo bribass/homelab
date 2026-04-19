@@ -1,4 +1,3 @@
-
 - name: Install '{{ timer_name }}' timer service unit file
   ansible.builtin.template:
     src: "conf/systemd/{{ timer_name }}.service.j2"

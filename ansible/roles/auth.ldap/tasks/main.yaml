@@ -1,13 +1,12 @@
-
 - name: Install SSSD from Debian
-  become: yes
   ansible.builtin.apt:
     update_cache: true
     install_recommends: false
     name:
-    - sssd-ldap
-    - libsss-sudo
+      - sssd-ldap
+      - libsss-sudo
     state: present
+  become: true
   when: ansible_distribution == "Debian"
 
 - name: Configure SSSD
@@ -18,7 +17,8 @@
     group: root
     mode: "0600"
 
-- import_role:
+- name: Install Homelab CA
+  ansible.builtin.import_role:
     name: install.homelab_ca
 
 - name: Start SSSD
@@ -26,4 +26,3 @@
     name: sssd
     enabled: true
     state: started
-

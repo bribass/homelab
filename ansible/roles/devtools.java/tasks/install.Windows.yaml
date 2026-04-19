@@ -44,7 +44,7 @@
     dest: "{{ env_script_dir }}/java-{{ item }}.bat"
 
 - name: Configure Windows Terminal with Java {{ item }} environment script
-  include_role:
+  ansible.builtin.include_role:
     name: devtools.envscript
     tasks_from: env.Windows.yaml
   vars:
@@ -52,4 +52,3 @@
     env_icon: java
     env_icon_file: "{{ lookup('ansible.builtin.fileglob', 'java.svg') }}"
     env_name: "Java {{ item }}"
-

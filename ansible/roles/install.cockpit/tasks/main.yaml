@@ -1,10 +1,10 @@
 - name: Install Cockpit from Debian
-  become: yes
   ansible.builtin.apt:
     update_cache: true
     install_recommends: false
     name: cockpit
     state: present
+  become: true
   when: ansible_distribution == "Debian"
 
 - name: Configure cockpit for root user
@@ -15,5 +15,4 @@
 
 - name: Add service to summary listing
   ansible.builtin.set_fact:
-    services: "{{ services | default([]) + services_additional }}"
-
+    services: "{{ services | default([]) + services_additional | default([]) }}"

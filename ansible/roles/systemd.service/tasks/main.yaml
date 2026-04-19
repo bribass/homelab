@@ -1,12 +1,13 @@
-
 - name: Install service unit file
   ansible.builtin.copy:
     src: "conf/systemd/{{ service_name }}.service"
     dest: /etc/systemd/system
+    user: root
+    group: root
+    mode: '0644'
 
 - name: Register service with systemd
   ansible.builtin.systemd_service:
     name: "{{ service_name }}"
     daemon_reload: true
     enabled: true
-

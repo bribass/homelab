@@ -1,19 +1,22 @@
 - name: Create local cache directory for package files
   ansible.builtin.file:
     path: "{{ cache_dir }}"
-    mode: "0755"
+    mode: '0755'
     state: directory
 
 - name: Create root installation directory for Java distributions
   ansible.builtin.file:
     path: "{{ java_dir }}"
-    mode: "0755"
+    mode: '0755'
     state: directory
 
 - name: Download Java {{ item }} distribution archive to cache
   ansible.builtin.get_url:
     url: "https://api.adoptium.net/v3/binary/latest/{{ item }}/ga/{{ java_os }}/{{ java_arch }}/{{ java_type }}/hotspot/normal/eclipse"
     dest: "{{ cache_dir }}"
+    user: root
+    group: wheel
+    mode: '0644'
   register: java_dl
 
 - name: Determine unpack directory of Java {{ item }} distribution archive
@@ -23,17 +26,17 @@
 - name: Unpack Java {{ item }} distribution archive
   ansible.builtin.command:
     argv:
-    - tar
-    - zxf
-    - "{{ java_dl.dest }}"
-    - -C
-    - "{{ java_dir }}"
+      - tar
+      - zxf
+      - "{{ java_dl.dest }}"
+      - -C
+      - "{{ java_dir }}"
     creates: "{{ java_dir }}/{{ java_type }}-{{ java_unpack_toplevel }}"
 
 - name: Create environment script directory
   ansible.builtin.file:
     path: "{{ env_script_dir }}"
-    mode: "0755"
+    mode: '0755'
     state: directory
 
 - name: Set up Java {{ item }} environment script
@@ -42,10 +45,10 @@
     dest: "{{ env_script_dir }}/java-{{ item }}"
     owner: root
     group: wheel
-    mode: "0755"
+    mode: '0755'
 
 - name: Configure iTerm2 with java {{ item }} environment script
-  include_role:
+  ansible.builtin.include_role:
     name: devtools.envscript
     tasks_from: env.Darwin.yaml
   vars:
@@ -53,4 +56,3 @@
     env_icon: java
     env_icon_file: "{{ lookup('ansible.builtin.fileglob', 'java.svg') }}"
     env_name: "Java {{ item }}"
-

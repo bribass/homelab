@@ -1,9 +1,10 @@
-- hosts: pi
+- name: Desired state configuration for 'pi'
+  hosts: pi
   tasks:
-  - import_role:
-      name: devtools.java
-    vars:
-      java_versions:
-      - "21"
-      - "25"
-
+    - name: Install Java
+      ansible.builtin.import_role:
+        name: devtools.java
+      vars:
+        java_versions:
+          - "21"
+          - "25"

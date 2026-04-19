@@ -41,7 +41,6 @@ variables:
     returned: always
 """
 
-
 import json
 import os
 

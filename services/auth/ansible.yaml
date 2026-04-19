@@ -1,27 +1,30 @@
-- hosts: auth
+- name: Desired state configuration for 'auth'
+  hosts: auth
   tasks:
-  - import_role: 
-      name: install.cockpit
+    - name: Install Cockpit
+      ansible.builtin.import_role:
+        name: install.cockpit
 
-  - name: Install 389 from Debian
-    become: yes
-    ansible.builtin.apt:
-      update_cache: true
-      install_recommends: false
-      name: 
-      - 389-ds-base
-      - cockpit-389-ds
-      state: present
+    - name: Install 389 from Debian
+      ansible.builtin.apt:
+        update_cache: true
+        install_recommends: false
+        name:
+          - 389-ds-base
+          - cockpit-389-ds
+        state: present
+      become: true
 
-  - import_role:
-      name: auth.ldap
+    - name: Configure system for LDAP authentication
+      ansible.builtin.import_role:
+        name: auth.ldap
 
-  - import_role:
-      name: service.summary
+    - name: Summarize services
+      ansible.builtin.import_role:
+        name: service.summary
 
   vars:
     services:
-    - name: LDAP
-      desc: "Lightweight Directory Access Protocol"
-      ports: 389/tcp
-
+      - name: LDAP
+        desc: "Lightweight Directory Access Protocol"
+        ports: 389/tcp
