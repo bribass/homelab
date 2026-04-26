@@ -1,0 +1,88 @@
+- name: Create local cache directory for package files
+  ansible.builtin.file:
+    path: "{{ cache_dir }}"
+    mode: '0755'
+    state: directory
+
+- name: Download rustup-init installer to cache
+  ansible.builtin.get_url:
+    url: "https://static.rust-lang.org/rustup/dist/{{ rust_arch }}/rustup-init"
+    dest: "{{ cache_dir }}"
+    owner: root
+    group: root
+    mode: '0755'
+  register: rustup_init_dl
+
+- name: Initial install of Rust environment
+  ansible.builtin.command:
+    argv:
+      - "{{ rustup_init_dl.dest }}"
+      - -y
+      - --default-host
+      - "{{ rust_arch }}"
+      - --default-toolchain
+      - "stable-{{ rust_arch }}"
+      - --no-modify-path
+    creates: "{{ cargo_dir }}/bin/rustup"
+  environment:
+    RUSTUP_HOME: "{{ rustup_dir }}"
+    CARGO_HOME: "{{ cargo_dir }}"
+
+- name: Update install of Rust environment
+  ansible.builtin.command:
+    argv:
+      - "{{ cargo_dir }}/bin/rustup"
+      - update
+  environment:
+    RUSTUP_HOME: "{{ rustup_dir }}"
+    CARGO_HOME: "{{ cargo_dir }}"
+
+- name: Install all targets of Rust environment
+  ansible.builtin.command:
+    argv:
+      - "{{ cargo_dir }}/bin/rustup"
+      - target
+      - add
+      - "{{ item }}"
+    creates: "{{ rustup_dir }}/toolchains/stable-{{ rust_arch }}/lib/rustlib/{{ item }}/"
+  environment:
+    RUSTUP_HOME: "{{ rustup_dir }}"
+    CARGO_HOME: "{{ cargo_dir }}"
+  loop: "{{ rust_targets | flatten }}"
+
+- name: Install all components of Rust environment
+  ansible.builtin.command:
+    argv:
+      - "{{ cargo_dir }}/bin/rustup"
+      - component
+      - add
+      - "{{ item }}"
+    creates: "{{ rustup_dir }}/toolchains/stable-{{ rust_arch }}/lib/rustlib/manifest-{{ item }}"
+  environment:
+    RUSTUP_HOME: "{{ rustup_dir }}"
+    CARGO_HOME: "{{ cargo_dir }}"
+  loop: "{{ rust_components | flatten }}"
+
+- name: Create environment script directory
+  ansible.builtin.file:
+    path: "{{ env_script_dir }}"
+    mode: '0755'
+    state: directory
+
+- name: Set up Rust environment script
+  ansible.builtin.template:
+    src: env.Debian.j2
+    dest: "{{ env_script_dir }}/rust"
+    owner: root
+    group: root
+    mode: '0755'
+
+- name: Configure Konsole with Rust environment script
+  ansible.builtin.include_role:
+    name: devtools.envscript
+    tasks_from: env.Debian.yaml
+  vars:
+    env_script: rust
+    env_icon: rust
+    env_icon_file: "{{ lookup('ansible.builtin.fileglob', 'rust.svg') }}"
+    env_name: Rust

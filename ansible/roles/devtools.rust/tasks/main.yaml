@@ -1,0 +1,15 @@
+- name: Load platform configuration for {{ ansible_os_family }}
+  ansible.builtin.include_vars:
+    file: "{{ lookup('ansible.builtin.first_found', lookup_params) }}"
+  vars:
+    lookup_params:
+      files:
+        - "platform.{{ ansible_os_family }}-{{ ansible_architecture }}.yaml"
+        - "platform.{{ ansible_os_family }}.yaml"
+      paths:
+        - "vars"
+
+- name: Install Rust for {{ ansible_os_family }}
+  ansible.builtin.include_tasks:
+    file: "install.{{ ansible_os_family }}.yaml"
+

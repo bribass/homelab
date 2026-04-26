@@ -14,7 +14,7 @@
   ansible.builtin.get_url:
     url: "https://api.adoptium.net/v3/binary/latest/{{ item }}/ga/{{ java_os }}/{{ java_arch }}/{{ java_type }}/hotspot/normal/eclipse"
     dest: "{{ cache_dir }}"
-    user: root
+    owner: root
     group: wheel
     mode: '0644'
   register: java_dl

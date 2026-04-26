@@ -1,0 +1,81 @@
+- name: Create local cache directory for package files
+  ansible.windows.win_file:
+    path: "{{ cache_dir }}"
+    mode: '0755'
+    state: directory
+
+- name: Download rustup-init installer to cache
+  ansible.windows.win_get_url:
+    url: "https://static.rust-lang.org/rustup/dist/{{ rust_arch }}/rustup-init.exe"
+    dest: "{{ cache_dir }}"
+  register: rustup_init_dl
+
+- name: Initial install of Rust environment
+  ansible.windows.win_command:
+    argv:
+      - "{{ rustup_init_dl.dest }}"
+      - -y
+      - --default-host
+      - "{{ rust_arch }}"
+      - --default-toolchain
+      - "stable-{{ rust_arch }}"
+      - --no-modify-path
+    creates: "{{ cargo_dir }}/bin/rustup.exe"
+  environment:
+    RUSTUP_HOME: "{{ rustup_dir }}"
+    CARGO_HOME: "{{ cargo_dir }}"
+
+- name: Update install of Rust environment
+  ansible.windows.win_command:
+    argv:
+      - "{{ cargo_dir }}/bin/rustup.exe"
+      - update
+  environment:
+    RUSTUP_HOME: "{{ rustup_dir }}"
+    CARGO_HOME: "{{ cargo_dir }}"
+
+- name: Install all targets of Rust environment
+  ansible.windows.win_command:
+    argv:
+      - "{{ cargo_dir }}/bin/rustup.exe"
+      - target
+      - add
+      - "{{ item }}"
+    creates: "{{ rustup_dir }}/toolchains/stable-{{ rust_arch }}/lib/rustlib/{{ item }}/"
+  environment:
+    RUSTUP_HOME: "{{ rustup_dir }}"
+    CARGO_HOME: "{{ cargo_dir }}"
+  loop: "{{ rust_targets | flatten }}"
+
+- name: Install all components of Rust environment
+  ansible.windows.win_command:
+    argv:
+      - "{{ cargo_dir }}/bin/rustup.exe"
+      - component
+      - add
+      - "{{ item }}"
+    creates: "{{ rustup_dir }}/toolchains/stable-{{ rust_arch }}/lib/rustlib/manifest-{{ item }}"
+  environment:
+    RUSTUP_HOME: "{{ rustup_dir }}"
+    CARGO_HOME: "{{ cargo_dir }}"
+  loop: "{{ rust_components | flatten }}"
+
+- name: Create environment script directory
+  ansible.windows.win_file:
+    path: "{{ env_script_dir }}"
+    state: directory
+
+- name: Set up Rust environment script
+  ansible.windows.win_template:
+    src: env.Windows.j2
+    dest: "{{ env_script_dir }}/rust.bat"
+
+- name: Configure Windows Terminal with Rust environment script
+  ansible.builtin.include_role:
+    name: devtools.envscript
+    tasks_from: env.Windows.yaml
+  vars:
+    env_script: rust
+    env_icon: rust
+    env_icon_file: "{{ lookup('ansible.builtin.fileglob', 'rust.svg') }}"
+    env_name: Rust

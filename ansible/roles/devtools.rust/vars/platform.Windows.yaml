@@ -1,0 +1,5 @@
+cache_dir: "C:\\Ansible Cache"
+cargo_dir: "C:\\Utils\\Rust"
+rustup_dir: "C:\\Utils\\Rustup"
+rust_arch: x86_64-pc-windows-msvc
+env_script_dir: "C:\\Utils\\DevTools"

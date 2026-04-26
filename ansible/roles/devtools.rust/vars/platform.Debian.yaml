@@ -1,0 +1,5 @@
+cache_dir: /var/local/pkg_cache
+cargo_dir: /opt/rust
+rustup_dir: /opt/rustup
+rust_arch: x86_64-unknown-linux-gnu
+env_script_dir: /opt/devtools

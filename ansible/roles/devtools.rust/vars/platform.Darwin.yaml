@@ -1,0 +1,5 @@
+cache_dir: "/Volumes/Dock/Ansible Cache"
+cargo_dir: /Volumes/Dock/DevTools/Rust
+rustup_dir: /Volumes/Dock/DevTools/Rustup
+rust_arch: aarch64-apple-darwin
+env_script_dir: /Volumes/Dock/DevTools/Scripts

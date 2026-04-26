@@ -8,3 +8,21 @@
         java_versions:
           - "21"
           - "25"
+
+    - name: Install Rust
+      ansible.builtin.import_role:
+        name: devtools.rust
+      vars:
+        rust_toolchain: stable
+        rust_targets:
+          - aarch64-apple-darwin
+          - wasm32-wasip1
+        rust_components:
+          - "rustc-{{ rust_arch }}"
+          - "cargo-{{ rust_arch }}"
+          - "clippy-{{ rust_arch }}"
+          - "rustfmt-{{ rust_arch }}"
+          - "rls-{{ rust_arch }}"
+          - "rust-docs-{{ rust_arch }}"
+          - rust-src
+          - "{{ rust_targets | map('regex_replace', '^', 'rust-std-') }}"
