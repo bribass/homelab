@@ -1,0 +1,48 @@
+- name: Prevent installation on Debian 12
+  ansible.builtin.fail:
+    msg: "Podman quartet service management does not work properly on Debian 12"
+  when:
+    - ansible_distribution == "Debian"
+    - ansible_distribution_major_version == "12"
+
+- name: Install Podman from Debian
+  become: true
+  ansible.builtin.apt:
+    update_cache: true
+    install_recommends: false
+    name: podman
+    state: present
+  when: ansible_distribution == "Debian"
+
+- name: Install Cockpit support for Podman from Debian
+  become: true
+  ansible.builtin.apt:
+    update_cache: true
+    install_recommends: false
+    name: cockpit-podman
+    state: present
+  when:
+    - ansible_distribution == "Debian"
+    - "'install.cockpit' in role_names"
+
+- name: Install overlay wrapper script
+  ansible.builtin.copy:
+    src: overlayzfsmount
+    dest: /usr/local/sbin/overlayzfsmount
+    owner: root
+    group: root
+    mode: '0755'
+
+- name: Configure Podman
+  ansible.builtin.copy:
+    src: storage.conf
+    dest: /etc/containers/storage.conf
+    owner: root
+    group: root
+    mode: '0644'
+
+- name: Pull OCI images
+  containers.podman.podman_image:
+    name: "{{ item }}"
+    state: present
+  loop: "{{ oci_images }}"

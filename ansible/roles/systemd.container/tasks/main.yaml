@@ -1,0 +1,21 @@
+- name: Create directory for container quadlet files
+  ansible.builtin.file:
+    path: /etc/containers/systemd
+    owner: root
+    group: root
+    mode: '0755'
+    state: directory
+
+- name: Install '{{ container_name }}' container quadlet unit file
+  ansible.builtin.template:
+    src: "conf/systemd/{{ container_name }}.container.j2"
+    dest: "/etc/containers/systemd/{{ container_name }}.container"
+    owner: root
+    group: root
+    mode: '0644'
+
+- name: Register container with systemd
+  ansible.builtin.systemd_service:
+    name: "{{ container_name }}"
+    daemon_reload: true
+    enabled: true

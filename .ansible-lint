@@ -5,3 +5,4 @@
 profile: production
 skip_list:
   - name[template]
+  - role-name
