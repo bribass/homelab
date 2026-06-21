@@ -1,0 +1,41 @@
+- name: Install Caddy from Debian
+  become: true
+  ansible.builtin.apt:
+    update_cache: true
+    install_recommends: false
+    name: caddy
+    state: present
+  when: ansible_distribution == "Debian"
+
+- name: Configure Caddy
+  ansible.builtin.copy:
+    src: conf/Caddyfile
+    dest: /etc/caddy/
+    owner: root
+    group: root
+    mode: '0644'
+  when: ansible_distribution == "Debian"
+
+- name: Create Homelab CA TLS directory
+  ansible.builtin.file:
+    path: /etc/ssl/homelab
+    owner: root
+    group: root
+    mode: '0755'
+    state: directory
+
+- name: Install Homelab CA TLS key
+  ansible.builtin.copy:
+    src: "{{ ca_root }}/server/private/{{ ansible_fqdn }}.key.pem"
+    dest: /etc/ssl/homelab/key.pem
+    owner: root
+    group: root
+    mode: '0644'
+
+- name: Install Homelab CA issued cert
+  ansible.builtin.template:
+    src: cert.pem.j2
+    dest: /etc/ssl/homelab/cert.pem
+    owner: root
+    group: root
+    mode: '0644'
