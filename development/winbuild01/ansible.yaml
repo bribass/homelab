@@ -1,0 +1,28 @@
+- name: Desired state configuration for 'winbuild01'
+  hosts: winbuild01
+  tasks:
+    - name: Install Java
+      ansible.builtin.import_role:
+        name: devtools.java
+      vars:
+        java_versions:
+          - "17"
+          - "21"
+          - "25"
+
+    - name: Install Rust
+      ansible.builtin.import_role:
+        name: devtools.rust
+      vars:
+        rust_toolchain: stable
+        rust_targets:
+          - x86_64-pc-windows-msvc
+          - wasm32-wasip1
+        rust_components:
+          - "rustc-{{ rust_arch }}"
+          - "cargo-{{ rust_arch }}"
+          - "clippy-{{ rust_arch }}"
+          - "rustfmt-{{ rust_arch }}"
+          - "rust-docs-{{ rust_arch }}"
+          - rust-src
+          - "{{ rust_targets | map('regex_replace', '^', 'rust-std-') }}"
