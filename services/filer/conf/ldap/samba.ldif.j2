@@ -1,0 +1,36 @@
+version: 1
+
+dn: dc=h,dc=bbassett,dc=net
+changetype: modify
+add: aci
+aci: (targetattr="*")(version 3.0; acl "R/W for Samba"; allow (read, write) us
+ erdn="ldap:///uid=Samba Admin,ou=Service Accounts,dc=h,dc=bbassett,dc=net";)
+
+dn: uid=Samba Admin,ou=Service Accounts,dc=h,dc=bbassett,dc=net
+changetype: add
+objectClass: top
+objectClass: account
+objectClass: simplesecurityobject
+uid: Samba Admin
+userPassword:: {{ passwd.auth.mgr | b64encode }}
+dsEntryDN: uid=Samba Admin,ou=Service Accounts,dc=h,dc=bbassett,dc=net
+
+dn: sambaDomainName=HOMELAB,dc=h,dc=bbassett,dc=net
+changetype: add
+objectClass: top
+objectClass: sambaDomain
+sambaDomainName: HOMELAB
+sambaSID: S-1-5-21-4069776208-2335726873-2074722092
+sambaAlgorithmicRidBase: 1000
+sambaNextUserRid: 1000
+sambaMinPwdLength: 5
+sambaPwdHistoryLength: 0
+sambaLogonToChgPwd: 0
+sambaMaxPwdAge: -1
+sambaMinPwdAge: 0
+sambaLockoutDuration: 30
+sambaLockoutObservationWindow: 30
+sambaLockoutThreshold: 0
+sambaForceLogoff: -1
+sambaRefuseMachinePwdChange: 0
+dsEntryDN: sambaDomainName=HOMELAB,dc=h,dc=bbassett,dc=net

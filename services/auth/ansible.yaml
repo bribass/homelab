@@ -12,6 +12,7 @@
         name:
           - 389-ds-base
           - cockpit-389-ds
+          - polkitd
         state: present
       become: true
 

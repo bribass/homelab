@@ -1,0 +1,42 @@
+version: 1
+
+dn: cn=git,ou=Service Accounts,dc=h,dc=bbassett,dc=net
+changetype: add
+objectClass: top
+objectClass: nsPerson
+objectClass: nsAccount
+objectClass: nsOrgPerson
+objectClass: posixAccount
+objectClass: nsmemberof
+cn: git
+displayName: Git Hosting
+gidNumber: 900
+homeDirectory: /home/git
+loginShell: /bin/bash
+uid: git
+uidNumber: 904
+memberOf: cn=Postgres Users,ou=Groups,dc=h,dc=bbassett,dc=net
+userPassword:: {{ passwd.gitea.git | b64encode }}
+passwordGraceUserTime: 0
+dsEntryDN: cn=git,ou=Service Accounts,dc=h,dc=bbassett,dc=net
+
+dn: cn=Gitea Users,ou=Groups,dc=h,dc=bbassett,dc=net
+changetype: add
+objectClass: top
+objectClass: groupOfNames
+cn: Gitea Users
+description: Users allowed to use Gitea
+dsEntryDN: cn=Gitea Users,ou=Groups,dc=h,dc=bbassett,dc=net
+
+dn: cn=Gitea Admins,ou=Groups,dc=h,dc=bbassett,dc=net
+changetype: add
+objectClass: top
+objectClass: groupOfNames
+cn: Gitea Admins
+description: Users allowed to administer Gitea
+dsEntryDN: cn=Gitea Admins,ou=Groups,dc=h,dc=bbassett,dc=net
+
+dn: cn=Postgres Users,ou=Groups,dc=h,dc=bbassett,dc=net
+changetype: modify
+add: member
+member: cn=git,ou=Service Accounts,dc=h,dc=bbassett,dc=net

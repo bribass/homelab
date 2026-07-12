@@ -2,3 +2,4 @@
 /test*
 /services/*/summary/services.yaml
 /ansible/plugins/*/__pycache__/
+/ldif

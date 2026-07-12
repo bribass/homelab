@@ -1,0 +1,12 @@
+[general]
+config_version = 2
+
+[slapd]
+instance_name = prod
+port = 389
+secure_port = 636
+root_password = {{ passwd.auth.mgr }}
+self_sign_cert = False
+
+[backend-userroot]
+suffix = dc=h,dc=bbassett,dc=net

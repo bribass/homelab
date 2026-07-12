@@ -1,0 +1,33 @@
+version: 1
+
+dn: uid=nextcloud,ou=Service Accounts,dc=h,dc=bbassett,dc=net
+changetype: add
+objectClass: top
+objectClass: account
+objectClass: simplesecurityobject
+objectClass: nsmemberof
+uid: nextcloud
+description: NextCloud
+userPassword:: {{ passwd.nextcloud.db_user | b64encode }}
+dsEntryDN: uid=nextcloud,ou=Service Accounts,dc=h,dc=bbassett,dc=net
+
+dn: cn=NextCloud Users,ou=Groups,dc=h,dc=bbassett,dc=net
+changetype: add
+objectClass: top
+objectClass: groupOfNames
+cn: NextCloud Users
+description: Users allowed to use NextCloud
+dsEntryDN: cn=NextCloud Users,ou=Groups,dc=h,dc=bbassett,dc=net
+
+dn: cn=NextCloud Admins,ou=Groups,dc=h,dc=bbassett,dc=net
+changetype: add
+objectClass: top
+objectClass: groupOfNames
+cn: NextCloud Admins
+description: Users allowed to administer NextCloud
+dsEntryDN: cn=NextCloud Admins,ou=Groups,dc=h,dc=bbassett,dc=net
+
+dn: cn=Postgres Users,ou=Groups,dc=h,dc=bbassett,dc=net
+changetype: modify
+add: member
+member: uid=nextcloud,ou=Service Accounts,dc=h,dc=bbassett,dc=net

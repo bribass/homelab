@@ -1,0 +1,52 @@
+version: 1
+
+dn: dc=h,dc=bbassett,dc=net
+objectClass: top
+objectClass: domain
+dc: h
+userPassword:: {{ passwd.auth.mgr | b64encode }}
+aci: (targetattr="*")(version 3.0; acl "Search for bind"; allow (read, search,
+  compare) userdn="ldap:///uid=LDAP Bind,ou=Service Accounts,dc=h,dc=bbassett,
+ dc=net";)
+dsEntryDN: dc=h,dc=bbassett,dc=net
+
+dn: ou=Users,dc=h,dc=bbassett,dc=net
+objectClass: top
+objectClass: organizationalUnit
+ou: Users
+dsEntryDN: ou=Users,dc=h,dc=bbassett,dc=net
+
+dn: ou=Groups,dc=h,dc=bbassett,dc=net
+objectClass: top
+objectClass: organizationalUnit
+ou: Groups
+dsEntryDN: ou=Groups,dc=h,dc=bbassett,dc=net
+
+dn: cn=service,ou=Groups,dc=h,dc=bbassett,dc=net
+objectClass: top
+objectClass: groupOfNames
+objectClass: posixGroup
+cn: service
+description: Service Users
+gidNumber: 900
+dsEntryDN: cn=service,ou=Groups,dc=h,dc=bbassett,dc=net
+
+dn: ou=Service Accounts,dc=h,dc=bbassett,dc=net
+objectClass: top
+objectClass: organizationalUnit
+ou: Service Accounts
+dsEntryDN: ou=Service Accounts,dc=h,dc=bbassett,dc=net
+
+dn: uid=LDAP Bind,ou=Service Accounts,dc=h,dc=bbassett,dc=net
+objectClass: top
+objectClass: account
+objectClass: simplesecurityobject
+uid: LDAP Bind
+userPassword:: {{ passwd.auth.bind | b64encode }}
+dsEntryDN: uid=LDAP Bind,ou=Service Accounts,dc=h,dc=bbassett,dc=net
+
+dn: ou=Sudoers,dc=h,dc=bbassett,dc=net
+objectClass: top
+objectClass: organizationalUnit
+ou: Sudoers
+dsEntryDN: ou=Sudoers,dc=h,dc=bbassett,dc=net

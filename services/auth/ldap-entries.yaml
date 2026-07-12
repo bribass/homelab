@@ -1,0 +1,28 @@
+- name: Process LDAP LDIF files for fully-qualified directory entries
+  hosts: localhost
+  tasks:
+    - name: Create directory for output LDIF files
+      ansible.builtin.file:
+        path: "{{ playbook_dir }}/../../ldif"
+        mode: '0755'
+        state: directory
+
+    - name: Identify all LDIF template files
+      ansible.builtin.find:
+        paths:
+          - "{{ playbook_dir }}/.."
+        recurse: true
+        use_regex: true
+        patterns:
+          - ".*instance\\.inf\\.j2"
+          - ".*\\.ldif\\.j2"
+      register: ldif_templates
+
+    - name: Process all LDIF files
+      ansible.builtin.template:
+        src: "{{ item.path }}"
+        dest: "{{ playbook_dir }}/../../ldif/{{ item.path | basename | regex_replace('\\.j2$', '') }}"
+        mode: '0644'
+      loop: "{{ ldif_templates.files }}"
+      loop_control:
+        label: "{{ item.path }}"
