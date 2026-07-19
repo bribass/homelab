@@ -9,6 +9,13 @@ OPTIONS: dict[str, tuple[str, list[Option], list[Positional]]] = {
         Option('u', 'user', 'USER', 'Username and realm (name@realm) to log in as', 'user', 'PVE_USER', None),
         Option('l', 'line', None, 'Output curl options in a line-oriented way', None, 'LINE_ORIENTED', False),
     ], []),
+    "fetch-config": ("Fetch the configuration of a VM or LXC container.", [
+        Option('H', 'host', 'HOST', 'Hostname of PVE server to log in to', 'host', 'PVE_HOST', None),
+        Option('P', 'port', 'PORT', 'Port of PVE server to log in to', 'port', 'PVE_PORT', '8006'),
+        Option('u', 'user', 'USER', 'Username and realm (name@realm) to log in as', 'user', 'PVE_USER', None),
+    ], [
+        Positional('readme-directory', 'directory containing README.md documentation file', 'README directory', 'README_DIR'),
+    ]),
     "oci-pull": ("Download an OCI image from a registry to a PVE storage pool.", [
         Option('H', 'host', 'HOST', 'Hostname of PVE server to log in to', 'host', 'PVE_HOST', None),
         Option('P', 'port', 'PORT', 'Port of PVE server to log in to', 'port', 'PVE_PORT', '8006'),
@@ -47,9 +54,17 @@ def default_value(opt: Option) -> str:
 
 def getopt_process(options: list[Option]) -> str:
     return "\n".join([f"""    -{opt.short_opt} | --{opt.long_opt})
-      {opt.var}={bool_yesno(not opt.default) if isinstance(opt.default, bool) else '"$2"'}
+      {opt.var}={process_value(opt)}
       shift {1 if isinstance(opt.default, bool) else 2}
       ;;""" for opt in options])
+
+
+def process_value(opt: Option) -> str:
+    if isinstance(opt.default, bool):
+        return f'={bool_yesno(not opt.default)}'
+    if isinstance(opt.default, list):
+        return '+=("$2")'
+    return '="$2"'
 
 
 def long_opt_and_metavar(opt: Option) -> str:
@@ -57,16 +72,33 @@ def long_opt_and_metavar(opt: Option) -> str:
 
 
 def getopt_usage(main_desc: str, options: list[Option], positional: list[Positional]) -> str:
-    options_indent = max([len(long_opt_and_metavar(opt)) for opt in options])
+    indent = max(max([len(long_opt_and_metavar(opt))+6 for opt in options], [len(pos.metavar) for pos in positional]))
+    help_message = [
+        f"Usage: $0 {' '.join([f"[-{opt.short_opt}|--{long_opt_and_metavar(opt)}]" for opt in options])} [-h|--help]{''.join([f' {pos.metavar}' for pos in positional])}",
+        main_desc,
+        "",
+    ]
+    if positional:
+        help_message.append("Required arguments:")
+        for pos in positional:
+            help_message.append(f"  {pos.metavar}{' '*(indent-len(pos.metavar))}  {pos.long_desc}")
+    if options:
+        help_message.append("Options:")
+        for opt in options:
+            help_message.append(f"  -{opt.short_opt}, --{long_opt_and_metavar(opt)}{' '*(indent-6-len(long_opt_and_metavar(opt)))}  {opt.long_desc}{usage_default_value(opt)}")
+    help_message.append(f"  -h, --help{' '*(indent-10)}  Display this help message")
     return f"""    -h | --help)
-      echo "Usage: $0 {' '.join([f"[-{opt.short_opt}|--{long_opt_and_metavar(opt)}]" for opt in options])} [-h|--help]{''.join([f' {pos.metavar}' for pos in positional])}"
-      echo "{main_desc}"
-      echo ""
-      echo "Options:"
-{'\n'.join([f"      echo \"  -{opt.short_opt}, --{long_opt_and_metavar(opt)}{' '*(options_indent-len(long_opt_and_metavar(opt)))}  {opt.long_desc}{f' (default {opt.default})' if opt.default is not None else ''}\"" for opt in options])}
-      echo "  -h, --help{' '*(options_indent-4)}  Display this help message"
+{"\n".join([f"      echo \"{x}\"" for x in help_message])}
       exit 0
       ;;"""
+
+
+def usage_default_value(opt: Option) -> str:
+    if isinstance(opt.default, list):
+        return ''
+    if opt.default is None:
+        return ''
+    return f' (default {opt.default})'
 
 
 def getopt_positional(positional: list[Positional]) -> str:

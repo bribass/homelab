@@ -35,6 +35,30 @@ function pve_login {
 }
 
 
+# Get the node name for the currently contacted PVE server
+# Arguments:
+# - hostname of the PVE server
+# - port of the PVE server
+# - name of the array variable containing the authentication information
+# - name of the variable to assign current node name to
+function pve_this_node {
+  local PVE_HOST="$1"
+  local PVE_PORT="$2"
+  # shellcheck disable=SC2178
+  local -n PVE_AUTH=$3
+  local -n _PVE_NODE=$4
+
+  local PVE_URL_BASE="https://${PVE_HOST}:${PVE_PORT}/api2/json/"
+
+  # Determine the node we have contacted
+  _PVE_NODE=$(curl -sk "${AUTH_OPTIONS[@]}" "${PVE_URL_BASE}cluster/status" | jq --raw-output '.data[] | select(.local==1) | .name')
+  if [ -z "$_PVE_NODE" ]; then
+    echo "$0: could not determine node name; aborting" >&2
+    exit 1
+  fi
+}
+
+
 # Show the task logs for a given PVE UPID identifier
 # Arguments:
 # - hostname of the PVE server

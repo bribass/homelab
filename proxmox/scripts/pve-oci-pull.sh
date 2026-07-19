@@ -1,6 +1,7 @@
 #!/bin/bash
 
 BASE_DIR=$(dirname "$0")
+# shellcheck disable=SC1091
 source "${BASE_DIR}/pve-functions.sh"
 
 # Process command line options
