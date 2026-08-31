@@ -2,7 +2,7 @@
   ansible.builtin.copy:
     src: "conf/systemd/{{ service_name }}.service"
     dest: /etc/systemd/system
-    user: root
+    owner: root
     group: root
     mode: '0644'
 

@@ -6,6 +6,7 @@ proxmox_hosted:
   children:
     proxmox_vms:
       hosts:
+        winbuild01:
     proxmox_lxc:
       hosts:
         filer:
@@ -29,3 +30,6 @@ tailscale:
   hosts:
     omega:
     nextcloud:
+testing:
+  hosts:
+    test:

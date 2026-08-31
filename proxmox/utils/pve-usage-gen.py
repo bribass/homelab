@@ -49,12 +49,14 @@ def default_value(opt: Option) -> str:
         return f'"{opt.default}"'
     if isinstance(opt.default, bool):
         return f'{bool_yesno(opt.default)}'
+    if isinstance(opt.default, list):
+        return '()'
     return '""'
 
 
 def getopt_process(options: list[Option]) -> str:
     return "\n".join([f"""    -{opt.short_opt} | --{opt.long_opt})
-      {opt.var}={process_value(opt)}
+      {opt.var}{process_value(opt)}
       shift {1 if isinstance(opt.default, bool) else 2}
       ;;""" for opt in options])
 

@@ -1,0 +1,3 @@
+FROM debian:13-slim
+RUN apt-get update && apt-get install -y systemd procps python3
+CMD [ "/lib/systemd/systemd" ]
