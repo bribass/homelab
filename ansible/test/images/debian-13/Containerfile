@@ -1,3 +1,59 @@
 FROM debian:13-slim
-RUN apt-get update && apt-get install -y systemd procps python3
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    adduser \
+    apt-listchanges \
+    apt-utils \
+    bash-completion \
+    bind9-dnsutils \
+    bsdextrautils \
+    bzip2 \
+    cpio \
+    dbus \
+    debconf-i18n \
+    debian-faq \
+    dhcpcd-base \
+    dmidecode \
+    doc-debian \
+    e2fsprogs \
+    fdisk \
+    gettext-base  \
+    ifupdown \
+    inetutils-telnet \
+    info \
+    init \
+    iputils-ping \
+    isc-dhcp-client \
+    kmod \
+    krb5-locales \
+    less  \
+    liblockfile-bin \
+    libnss-systemd \
+    libp11-kit0 \
+    libpam-systemd \
+    libpam-wtmpdb \
+    linux-sysctl-defaults \
+    locales \
+    logrotate \
+    logsave \
+    lsof \
+    man-db \
+    manpages \
+    nano \
+    ncurses-term  \
+    netcat-traditional \
+    nftables \
+    perl \
+    postfix \
+    reportbug \
+    ssh \
+    systemd systemd-timesyncd udev \
+    traceroute \
+    util-linux-extra \
+    vim-tiny \
+    wamerican \
+    wget \
+    whiptail \
+    wtmpdb \
+    xz-utils \
+    && apt-get clean
 CMD [ "/lib/systemd/systemd" ]
