@@ -1,5 +1,6 @@
 #!/bin/bash
 
+## START OPTIONS
 # Process command line options
 if ! OPTS=$(getopt -o H:P:u:lh -l host:,port:,user:,line,help -n "$0" -- "$@"); then
   exit 1
@@ -58,6 +59,7 @@ if [ -z "$PVE_USER" ]; then
   echo "$0: no user specified; aborting" >&2
   exit 1
 fi
+## END OPTIONS
 
 # Do the login
 pve_login "$PVE_HOST" "$PVE_PORT" "$PVE_USER" AUTH_OPTIONS

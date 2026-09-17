@@ -4,6 +4,8 @@ BASE_DIR=$(dirname "$0")
 # shellcheck disable=SC1091
 source "${BASE_DIR}/pve-functions.sh"
 
+## START OPTIONS
+# Process command line options
 if ! OPTS=$(getopt -o H:P:u:h -l host:,port:,user:,help -n "$0" -- "$@"); then
   exit 1
 fi
@@ -62,6 +64,7 @@ if [ -z "$README_DIR" ]; then
   echo "$0: no README directory specified; aborting" >&2
   exit 1
 fi
+## END OPTIONS
 
 # Check to make sure the README exists in the readme directory
 README_FILE="$README_DIR/README.md"

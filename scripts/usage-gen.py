@@ -1,29 +1,39 @@
-from collections import namedtuple
+import collections
+import filecmp
+import os
+import shutil
+import tempfile
 
-Option = namedtuple('Option', ['short_opt', 'long_opt', 'metavar', 'long_desc', 'short_desc', 'var', 'default'])
-Positional = namedtuple('Positional', ['metavar', 'long_desc', 'short_desc', 'var'])
+Option = collections.namedtuple('Option', ['short_opt', 'long_opt', 'metavar', 'long_desc', 'short_desc', 'var', 'default'])
+Positional = collections.namedtuple('Positional', ['metavar', 'long_desc', 'short_desc', 'var'])
 OPTIONS: dict[str, tuple[str, list[Option], list[Positional]]] = {
-    "login": ("Log in to a Proxmox PVE server and print curl options for authenticating with that session.", [
+    "proxmox/scripts/pve-login.sh": ("Log in to a Proxmox PVE server and print curl options for authenticating with that session.", [
         Option('H', 'host', 'HOST', 'Hostname of PVE server to log in to', 'host', 'PVE_HOST', None),
         Option('P', 'port', 'PORT', 'Port of PVE server to log in to', 'port', 'PVE_PORT', '8006'),
         Option('u', 'user', 'USER', 'Username and realm (name@realm) to log in as', 'user', 'PVE_USER', None),
         Option('l', 'line', None, 'Output curl options in a line-oriented way', None, 'LINE_ORIENTED', False),
     ], []),
-    "fetch-config": ("Fetch the configuration of a VM or LXC container.", [
+    "proxmox/scripts/pve-fetch-config.sh": ("Fetch the configuration of a VM or LXC container.", [
         Option('H', 'host', 'HOST', 'Hostname of PVE server to log in to', 'host', 'PVE_HOST', None),
         Option('P', 'port', 'PORT', 'Port of PVE server to log in to', 'port', 'PVE_PORT', '8006'),
         Option('u', 'user', 'USER', 'Username and realm (name@realm) to log in as', 'user', 'PVE_USER', None),
     ], [
         Positional('readme-directory', 'directory containing README.md documentation file', 'README directory', 'README_DIR'),
     ]),
-    "oci-pull": ("Download an OCI image from a registry to a PVE storage pool.", [
+    "proxmox/scripts/pve-oci-pull.sh": ("Download an OCI image from a registry to a PVE storage pool.", [
         Option('H', 'host', 'HOST', 'Hostname of PVE server to log in to', 'host', 'PVE_HOST', None),
         Option('P', 'port', 'PORT', 'Port of PVE server to log in to', 'port', 'PVE_PORT', '8006'),
         Option('u', 'user', 'USER', 'Username and realm (name@realm) to log in as', 'user', 'PVE_USER', None),
         Option('s', 'storage', 'POOL', 'PVE storage pool name to download image to', 'storage pool', 'PVE_STORAGE', None),
-        Option('f', 'filename', 'NAME', 'Set the filename (sans extension) of the template file on the PVE server', None, 'PVE_FILENAME', None)
+        Option('f', 'filename', 'NAME', 'Set the filename (sans extension) of the template file on the PVE server', None, 'PVE_FILENAME', None),
     ], [
         Positional('oci-image-ref', 'OCI image reference to download', 'OCI image reference', 'OCI_IMAGE'),
+    ]),
+    "ansible/test/scripts/start-test.sh": ("Start an OCI image as an Ansible testing container.", [
+        Option('n', 'name', 'NAME', 'name of the container to create', 'container name', 'OCI_CONTAINER_NAME', 'test'),
+        Option('p', 'port', 'PORT', 'port to expose', 'port', 'EXPOSE_PORTS', []),
+    ], [
+        Positional('oci-image-ref', 'OCI image reference to start', 'OCI image reference', 'OCI_IMAGE'),
     ]),
 }
 
@@ -98,7 +108,7 @@ def getopt_usage(main_desc: str, options: list[Option], positional: list[Positio
 def usage_default_value(opt: Option) -> str:
     if isinstance(opt.default, list):
         return ''
-    if opt.default is None:
+    if opt.default is None or isinstance(opt.default, bool):
         return ''
     return f' (default {opt.default})'
 
@@ -111,20 +121,25 @@ def getopt_positional(positional: list[Positional]) -> str:
 
 
 def getopt_nondefaults(options: list[Option], positional: list[Positional]) -> str:
-    all = []
-    all.extend([opt for opt in options if opt.default is None and opt.short_desc is not None])
-    all.extend(positional)
-    return "\n".join([f"""if [ -z "${opt.var}" ]; then
-  echo "$0: no {opt.short_desc} specified; aborting" >&2
+    items = []
+    items.extend([(opt.var, opt.short_desc) for opt in options if opt.default is None and opt.short_desc is not None])
+    items.extend([(p.var, p.short_desc) for p in positional])
+    return "\n".join([f"""if [ -z "${item[0]}" ]; then
+  echo "$0: no {item[1]} specified; aborting" >&2
   exit 1
-fi""" for opt in all])
+fi""" for item in items])
 
 
 def main():
     for prog, (desc, opts, pos) in OPTIONS.items():
-        print(f"""## pve-{prog}.sh
-
-# Process command line options
+        with tempfile.NamedTemporaryFile("w", encoding='utf-8', delete=False) as file_out:
+            with open(prog, "r", encoding='utf-8') as file_in:
+                in_options = False
+                for line in file_in.readlines():
+                    if line.strip() == "## START OPTIONS":
+                        in_options = True
+                        file_out.write(line)
+                        file_out.write(f"""# Process command line options
 if ! OPTS=$(getopt -o {getopt_short(opts)}h -l {getopt_long(opts)},help -n "$0" -- "$@"); then
   exit 1
 fi
@@ -135,7 +150,7 @@ while true; do
 {getopt_process(opts)}
 {getopt_usage(desc, opts, pos)}
     --)
-      shift 
+      shift
       break
       ;;
     *)
@@ -147,8 +162,23 @@ done
 {getopt_positional(pos)}
 {getopt_nondefaults(opts, pos)}
 """)
-
-
+                    elif line.strip() == "## END OPTIONS":
+                        in_options = False
+                        file_out.write(line)
+                    elif not in_options:
+                        file_out.write(line)
+        try:
+            if filecmp.cmp(prog, file_out.name, shallow=False):
+                # no changes (files compare similarly); delete the temp file
+                os.remove(file_out.name)
+            else:
+                # replace the original with the generated temp file
+                shutil.move(file_out.name, prog)
+        except:
+            # clean up temp file on any error, and propagate the error up
+            if os.path.exists(file_out.name):
+                os.remove(file_out.name)
+            raise
 
 
 if __name__ == '__main__':

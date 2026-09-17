@@ -4,6 +4,7 @@ BASE_DIR=$(dirname "$0")
 # shellcheck disable=SC1091
 source "${BASE_DIR}/pve-functions.sh"
 
+## START OPTIONS
 # Process command line options
 if ! OPTS=$(getopt -o H:P:u:s:f:h -l host:,port:,user:,storage:,filename:,help -n "$0" -- "$@"); then
   exit 1
@@ -40,6 +41,8 @@ while true; do
       echo "Usage: $0 [-H|--host HOST] [-P|--port PORT] [-u|--user USER] [-s|--storage POOL] [-f|--filename NAME] [-h|--help] oci-image-ref"
       echo "Download an OCI image from a registry to a PVE storage pool."
       echo ""
+      echo "Required arguments:"
+      echo "  oci-image-ref        OCI image reference to download"
       echo "Options:"
       echo "  -H, --host HOST      Hostname of PVE server to log in to"
       echo "  -P, --port PORT      Port of PVE server to log in to (default 8006)"
@@ -77,6 +80,7 @@ if [ -z "$OCI_IMAGE" ]; then
   echo "$0: no OCI image reference specified; aborting" >&2
   exit 1
 fi
+## END OPTIONS
 
 # Log in to PVE
 pve_login "$PVE_HOST" "$PVE_PORT" "$PVE_USER" AUTH_OPTIONS

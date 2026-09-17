@@ -1,5 +1,6 @@
 #!/bin/bash
 
+## START OPTIONS
 # Process command line options
 if ! OPTS=$(getopt -o n:p:h -l name:,port:,help -n "$0" -- "$@"); then
   exit 1
@@ -45,13 +46,14 @@ if [ -z "$OCI_IMAGE" ]; then
   echo "$0: no OCI image reference specified; aborting" >&2
   exit 1
 fi
+## END OPTIONS
 
 # Start the container image
 ADDITIONAL_OPTIONS=()
 for port in "${EXPOSE_PORTS[@]}"; do
   ADDITIONAL_OPTIONS+=("--publish" "$port:$port")
 done
-CONTAINER=$(podman run --detach --rm --name "${OCI_CONTAINER_NAME}" --volume "${PWD}:/homelab" "${ADDITIONAL_OPTIONS[@]}" "${OCI_IMAGE}")
+CONTAINER=$(podman run --detach --rm --name "${OCI_CONTAINER_NAME}" --volume "${PWD}:/homelab" --cap-add=CAP_SYS_ADMIN "${ADDITIONAL_OPTIONS[@]}" "${OCI_IMAGE}")
 if [ -z "$CONTAINER" ]; then
   echo "$0: container did not start; aborting" >&2
   exit 1
