@@ -1,26 +1,48 @@
-import collections
 import filecmp
 import os
 import shutil
 import tempfile
+import typing
 
-Option = collections.namedtuple('Option', ['short_opt', 'long_opt', 'metavar', 'long_desc', 'short_desc', 'var', 'default'])
-Positional = collections.namedtuple('Positional', ['metavar', 'long_desc', 'short_desc', 'var'])
-OPTIONS: dict[str, tuple[str, list[Option], list[Positional]]] = {
-    "proxmox/scripts/pve-login.sh": ("Log in to a Proxmox PVE server and print curl options for authenticating with that session.", [
+
+class Option(typing.NamedTuple):
+    short_opt: str
+    long_opt: str
+    metavar: str | None
+    long_desc: str
+    short_desc: str | None
+    var: str
+    default: None | bool | str | list
+
+
+class Positional(typing.NamedTuple):
+    metavar: str
+    long_desc: str
+    short_desc: str
+    var: str
+
+
+class Script(typing.NamedTuple):
+    usage: str
+    options: list[Option]
+    positions: list[Positional]
+
+
+OPTIONS: dict[str, Script] = {
+    "proxmox/scripts/pve-login.sh": Script("Log in to a Proxmox PVE server and print curl options for authenticating with that session.", [
         Option('H', 'host', 'HOST', 'Hostname of PVE server to log in to', 'host', 'PVE_HOST', None),
         Option('P', 'port', 'PORT', 'Port of PVE server to log in to', 'port', 'PVE_PORT', '8006'),
         Option('u', 'user', 'USER', 'Username and realm (name@realm) to log in as', 'user', 'PVE_USER', None),
         Option('l', 'line', None, 'Output curl options in a line-oriented way', None, 'LINE_ORIENTED', False),
     ], []),
-    "proxmox/scripts/pve-fetch-config.sh": ("Fetch the configuration of a VM or LXC container.", [
+    "proxmox/scripts/pve-fetch-config.sh": Script("Fetch the configuration of a VM or LXC container.", [
         Option('H', 'host', 'HOST', 'Hostname of PVE server to log in to', 'host', 'PVE_HOST', None),
         Option('P', 'port', 'PORT', 'Port of PVE server to log in to', 'port', 'PVE_PORT', '8006'),
         Option('u', 'user', 'USER', 'Username and realm (name@realm) to log in as', 'user', 'PVE_USER', None),
     ], [
         Positional('readme-directory', 'directory containing README.md documentation file', 'README directory', 'README_DIR'),
     ]),
-    "proxmox/scripts/pve-oci-pull.sh": ("Download an OCI image from a registry to a PVE storage pool.", [
+    "proxmox/scripts/pve-oci-pull.sh": Script("Download an OCI image from a registry to a PVE storage pool.", [
         Option('H', 'host', 'HOST', 'Hostname of PVE server to log in to', 'host', 'PVE_HOST', None),
         Option('P', 'port', 'PORT', 'Port of PVE server to log in to', 'port', 'PVE_PORT', '8006'),
         Option('u', 'user', 'USER', 'Username and realm (name@realm) to log in as', 'user', 'PVE_USER', None),
@@ -29,7 +51,7 @@ OPTIONS: dict[str, tuple[str, list[Option], list[Positional]]] = {
     ], [
         Positional('oci-image-ref', 'OCI image reference to download', 'OCI image reference', 'OCI_IMAGE'),
     ]),
-    "ansible/test/scripts/start-test.sh": ("Start an OCI image as an Ansible testing container.", [
+    "ansible/test/scripts/start-test.sh": Script("Start an OCI image as an Ansible testing container.", [
         Option('n', 'name', 'NAME', 'name of the container to create', 'container name', 'OCI_CONTAINER_NAME', 'test'),
         Option('p', 'port', 'PORT', 'port to expose', 'port', 'EXPOSE_PORTS', []),
     ], [
@@ -58,7 +80,7 @@ def default_value(opt: Option) -> str:
     if isinstance(opt.default, str):
         return f'"{opt.default}"'
     if isinstance(opt.default, bool):
-        return f'{bool_yesno(opt.default)}'
+        return f'{bool_yesno(bool(opt.default))}'
     if isinstance(opt.default, list):
         return '()'
     return '""'
@@ -174,6 +196,7 @@ done
             else:
                 # replace the original with the generated temp file
                 shutil.move(file_out.name, prog)
+                os.chmod(prog, 0o755)
         except:
             # clean up temp file on any error, and propagate the error up
             if os.path.exists(file_out.name):

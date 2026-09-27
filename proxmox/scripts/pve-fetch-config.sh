@@ -75,10 +75,11 @@ fi
 
 # Determine the VM/CT status and ID
 if ID_LINE=$(grep "Proxmox ID" "$README_FILE"); then
+  ID_NUMBER="${ID_LINE//[^0-9]/}"
+else
   echo "$0: $README_FILE did not contain 'Proxmox ID' line; aborting" >&2
   exit 1
 fi
-ID_NUMBER="${ID_LINE//[^0-9]/}"
 case "$ID_LINE" in
   *CT*)
     ID_CATEGORY=lxc
