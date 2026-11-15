@@ -25,6 +25,15 @@ Because all user accounts in Postgres (with the exception of the default `postgr
    ```postgresql
    create database :dbname with owner :username;
    ```
+   
+### Grant access to database
+
+1. As `postgres` in the container, run `psql ${dbname}`.  In the Postgres shell run the queries:
+   ```postgresql
+   grant connect on database :dbname to :username;
+   grant usage on schema public to :username;
+   grant select on all tables in schema public to :username;
+   ```
 
 ## References
 
