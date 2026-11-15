@@ -1,0 +1,19 @@
+[Unit]
+Description=Ultimate Certificate Manager
+
+[Container]
+Image=docker.io/neyslim/ultimate-ca-manager:{{ ucm.version }}
+Network=systemd.network
+PublishPort=8443:8443
+PublishPort=8080:8080
+Volume=/opt/ucm/data:/opt/ucm/data
+Volume=/opt/ucm/etc:/etc/ucm
+Environment=DATABASE_URL=postgresql://ucm:{{ passwd.ca.ucm_user | urlencode }}@db.h.bbassett.net:5432/ucm
+Environment=UCM_FQDN={{ ansible_fqdn }}
+Environment=UCM_HTTPS_PORT=8443
+
+[Service]
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

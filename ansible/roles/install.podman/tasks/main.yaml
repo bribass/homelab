@@ -5,12 +5,33 @@
     - ansible_distribution == "Debian"
     - ansible_distribution_major_version == "12"
 
+- name: Verify LXC configuration is correct
+  block:
+    - name: "Verify LXC configuration is correct : Read LXC configuration"
+      ansible.builtin.slurp:
+        src: "{{ playbook_dir }}/proxmox-pct.cfg"
+      register: lxc_config
+
+    - name: "Verify LXC configuration is correct : Required LXC configuration entries"
+      ansible.builtin.fail:
+        msg: "LXC not correctly configured for Podman operations; see `ansible/roles/systemd.container/README.md` for reference with required changes"
+      when: >
+        'lxc.mount.entry: ' not in (lxc_config.content | b64decode) or
+        'lxc.idmap: u ' not in (lxc_config.content | b64decode) or
+        'lxc.idmap: g ' not in (lxc_config.content | b64decode)
+  when: "'proxmox_lxc' in group_names"
+  delegate_to: localhost
+
 - name: Install Podman from Debian
   become: true
   ansible.builtin.apt:
     update_cache: true
     install_recommends: false
-    name: podman
+    name:
+      - podman
+      - aardvark-dns
+      - passt
+      - uidmap
     state: present
   when: ansible_distribution == "Debian"
 
@@ -32,11 +53,21 @@
     owner: root
     group: root
     mode: '0755'
+  when: use_overlay_zfs_wrapper
 
 - name: Configure Podman
   ansible.builtin.copy:
     src: storage.conf
     dest: /etc/containers/storage.conf
+    owner: root
+    group: root
+    mode: '0644'
+  when: use_overlay_zfs_wrapper
+
+- name: Create network for systemd hosted containers
+  ansible.builtin.copy:
+    src: systemd.network
+    dest: /etc/containers/systemd/systemd.network
     owner: root
     group: root
     mode: '0644'

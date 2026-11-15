@@ -1,0 +1,34 @@
+version: 1
+
+dn: cn=ucm,ou=Service Accounts,dc=h,dc=bbassett,dc=net
+changetype: add
+objectClass: top
+objectClass: nsPerson
+objectClass: nsAccount
+objectClass: nsOrgPerson
+objectClass: posixAccount
+objectClass: nsmemberof
+cn: ucm
+displayName: Ultimate Certificate Manager
+gidNumber: 900
+homeDirectory: /opt/ucm
+loginShell: /bin/bash
+uid: ucm
+uidNumber: 900
+memberOf: cn=Postgres Users,ou=Groups,dc=h,dc=bbassett,dc=net
+userPassword:: {{ passwd.ca.ucm_user | b64encode }}
+passwordGraceUserTime: 0
+dsEntryDN: cn=ucm,ou=Service Accounts,dc=h,dc=bbassett,dc=net
+
+dn: cn=Postgres Users,ou=Groups,dc=h,dc=bbassett,dc=net
+changetype: modify
+add: member
+member: cn=ucm,ou=Service Accounts,dc=h,dc=bbassett,dc=net
+
+dn: cn=UCM Admins,ou=Groups,dc=h,dc=bbassett,dc=net
+changetype: add
+objectClass: top
+objectClass: groupOfNames
+cn: UCM Admins
+description: Users allowed to modify certificate authority issuance
+dsEntryDN: cn=UCM Admins,ou=Groups,dc=h,dc=bbassett,dc=net

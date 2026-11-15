@@ -1,0 +1,36 @@
+- name: Desired state configuration for 'certs'
+  hosts: certs
+  tasks:
+    - name: Configure system for LDAP authentication
+      ansible.builtin.import_role:
+        name: auth.ldap
+
+    - name: Install Podman
+      ansible.builtin.import_role:
+        name: install.podman
+      vars:
+        oci_images:
+          - docker.io/neyslim/ultimate-ca-manager:{{ ucm.version }}
+
+    - name: Configure UCM container
+      ansible.builtin.import_role:
+        name: systemd.container
+      vars:
+        container_name: ucm
+
+    - name: Summarize services
+      ansible.builtin.import_role:
+        name: service.summary
+
+  vars:
+    services:
+      - name: Homelab CA
+        desc: Certificate Authority web frontend
+        url: "https://{{ ansible_fqdn }}:8443/"
+
+      - name: Homelab CA ACME
+        desc: "Certificate Authority ACME (Let's Encrypt-style) server directory endpoint"
+        url: "https://{{ ansible_fqdn }}:8443/acme"
+
+    ucm:
+      version: 2.254.1

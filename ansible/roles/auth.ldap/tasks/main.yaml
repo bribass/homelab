@@ -19,7 +19,7 @@
 
 - name: Install Homelab CA
   ansible.builtin.import_role:
-    name: install.homelab_ca
+    name: homelab_ca.ca_root
 
 - name: Start SSSD
   ansible.builtin.systemd_service:

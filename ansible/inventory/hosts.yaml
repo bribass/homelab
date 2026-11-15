@@ -13,6 +13,7 @@ proxmox_hosted:
         auth:
         db:
         git:
+        certs:
         nextcloud:
 development:
   hosts:

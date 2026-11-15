@@ -1,6 +1,6 @@
 - name: Install Homelab CA certs on Debian
   ansible.builtin.copy:
-    src: "{{ homelab_root }}/ca/root/certs/ca.crt.pem"
+    src: "{{ homelab_root }}/services/certs/conf/ca-root/ca.crt"
     dest: /usr/local/share/ca-certificates/homelab-ca.crt
     owner: root
     group: root
