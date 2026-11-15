@@ -51,7 +51,7 @@ function pve_this_node {
   local PVE_URL_BASE="https://${PVE_HOST}:${PVE_PORT}/api2/json/"
 
   # Determine the node we have contacted
-  _PVE_NODE=$(curl -sk "${AUTH_OPTIONS[@]}" "${PVE_URL_BASE}cluster/status" | jq --raw-output '.data[] | select(.local==1) | .name')
+  _PVE_NODE=$(curl -sk "${PVE_AUTH[@]}" "${PVE_URL_BASE}cluster/status" | jq --raw-output '.data[] | select(.local==1) | .name')
   if [ -z "$_PVE_NODE" ]; then
     echo "$0: could not determine node name; aborting" >&2
     exit 1
@@ -90,4 +90,41 @@ function pve_upid_logs {
 
   # Now retrieve the logs from the task
   curl -sk "${PVE_AUTH[@]}" "${PVE_URL_BASE}nodes/${PVE_NODE}/tasks/${PVE_UPID}/log" | jq --raw-output '.data[] | .t'
+}
+
+# Determine the VM or container number from local documentation
+# Arguments:
+# - hostname of the PVE server
+# - port of the PVE server
+# - name of the array variable containing the authentication information
+# - filename of the local documentation file
+# - name of the variable to assign the VMID to
+# - name of the variable to assign the API type ('qemu' or 'lxc') to
+function pve_vmid {
+  local PVE_HOST="$1"
+  local PVE_PORT="$2"
+  # shellcheck disable=SC2178
+  local -n PVE_AUTH=$3
+  local PVE_DOC_NAME="$4"
+  local -n _VM_ID=$5
+  local -n _VM_CAT=$6
+
+  if ID_LINE=$(grep "Proxmox ID" "$PVE_DOC_NAME"); then
+    _VM_ID="${ID_LINE//[^0-9]/}"
+  else
+    echo "$0: $PVE_DOC_NAME did not contain 'Proxmox ID' line; aborting" >&2
+    exit 1
+  fi
+  case "$ID_LINE" in
+    *CT*)
+      _VM_CAT=lxc
+      ;;
+    *VM*)
+      _VM_CAT=qemu
+      ;;
+    *)
+      echo "$0: $PVE_DOC_NAME did not declare Proxmox ID as either 'CT' or 'VM'; aborting" >&2
+      exit 1
+      ;;
+  esac
 }

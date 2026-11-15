@@ -106,7 +106,16 @@ def long_opt_and_metavar(opt: Option) -> str:
 
 
 def getopt_usage(main_desc: str, options: list[Option], positional: list[Positional]) -> str:
-    indent = max(max([len(long_opt_and_metavar(opt))+6 for opt in options], [len(pos.metavar) for pos in positional]))
+    # Calculate the indent required to align all option descriptions
+    indent = 0
+    for pos in positional:
+        if (newlen := len(pos.metavar)) > indent:
+            indent = newlen
+    for opt in options:
+        if (newlen := len(long_opt_and_metavar(opt))+6) > indent:
+            indent = newlen
+
+    # Assemble usage message
     help_message = [
         f"Usage: $0 {' '.join([f"[-{opt.short_opt}|--{long_opt_and_metavar(opt)}]" for opt in options])} [-h|--help]{''.join([f' {pos.metavar}' for pos in positional])}",
         main_desc,

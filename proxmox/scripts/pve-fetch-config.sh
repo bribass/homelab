@@ -41,7 +41,7 @@ while true; do
       exit 0
       ;;
     --)
-      shift
+      shift 
       break
       ;;
     *)
@@ -74,24 +74,13 @@ if [ ! -f "$README_FILE" ]; then
 fi
 
 # Determine the VM/CT status and ID
-if ID_LINE=$(grep "Proxmox ID" "$README_FILE"); then
-  ID_NUMBER="${ID_LINE//[^0-9]/}"
-else
-  echo "$0: $README_FILE did not contain 'Proxmox ID' line; aborting" >&2
-  exit 1
-fi
-case "$ID_LINE" in
-  *CT*)
-    ID_CATEGORY=lxc
+pve_vmid "$PVE_HOST" "$PVE_PORT" AUTH_OPTIONS "$README_FILE" ID_NUMBER ID_CATEGORY
+case "$ID_CATEGORY" in
+  lxc)
     ID_FILENAME=proxmox-pct.cfg
     ;;
-  *VM*)
-    ID_CATEGORY=qemu
+  qemu)
     ID_FILENAME=proxmox-qm.cfg
-    ;;
-  *)
-    echo "$0: $README_FILE did not declare Proxmox ID as either 'CT' or 'VM'; aborting" >&2
-    exit 1
     ;;
 esac
 

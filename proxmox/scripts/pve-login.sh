@@ -36,12 +36,12 @@ while true; do
       echo "  -H, --host HOST  Hostname of PVE server to log in to"
       echo "  -P, --port PORT  Port of PVE server to log in to (default 8006)"
       echo "  -u, --user USER  Username and realm (name@realm) to log in as"
-      echo "  -l, --line       Output curl options in a line-oriented way"
+      echo "  -l, --line       Output curl options in a line-oriented way (default False)"
       echo "  -h, --help       Display this help message"
       exit 0
       ;;
     --)
-      shift
+      shift 
       break
       ;;
     *)
