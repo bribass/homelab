@@ -16,6 +16,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     doc-debian \
     e2fsprogs \
     fdisk \
+    fuse-overlayfs \
     gettext-base  \
     ifupdown \
     inetutils-telnet \
@@ -56,4 +57,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     wtmpdb \
     xz-utils \
     && apt-get clean
+RUN mkdir -p /etc/containers
+COPY storage.conf /etc/containers/
 CMD [ "/lib/systemd/systemd" ]

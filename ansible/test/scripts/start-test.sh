@@ -53,7 +53,7 @@ ADDITIONAL_OPTIONS=()
 for port in "${EXPOSE_PORTS[@]}"; do
   ADDITIONAL_OPTIONS+=("--publish" "$port:$port")
 done
-CONTAINER=$(podman run --detach --rm --name "${OCI_CONTAINER_NAME}" --volume "${PWD}:/homelab" --cap-add=CAP_SYS_ADMIN "${ADDITIONAL_OPTIONS[@]}" "${OCI_IMAGE}")
+CONTAINER=$(podman run --detach --rm --name "${OCI_CONTAINER_NAME}" --volume "${PWD}:/homelab" --cap-add=CAP_SYS_ADMIN --device /dev/fuse "${ADDITIONAL_OPTIONS[@]}" "${OCI_IMAGE}")
 if [ -z "$CONTAINER" ]; then
   echo "$0: container did not start; aborting" >&2
   exit 1
