@@ -1,0 +1,55 @@
+- name: Install packages from Debian
+  ansible.builtin.apt:
+    update_cache: true
+    install_recommends: false
+    name:
+      - certbot
+    state: present
+  when: ansible_distribution == "Debian"
+
+- name: Create directory structure for homelab CA work
+  ansible.builtin.file:
+    path: "{{ item }}/homelab_ca"
+    owner: root
+    group: root
+    mode: '0755'
+    state: directory
+  loop:
+    - /etc
+    - /var/lib
+    - /var/log
+
+- name: Copy homelab CA ACME configuration
+  ansible.builtin.template:
+    src: cli.ini.j2
+    dest: /etc/homelab_ca/cli.ini
+    owner: root
+    group: root
+    mode: '0644'
+
+- name: Request initial certificate
+  ansible.builtin.command:
+    cmd: "certbot certonly --config /etc/homelab_ca/cli.ini"
+    creates: "/etc/homelab_ca/live/{{ ansible_fqdn }}/privkey.pem"
+
+- name: Create directory for systemd overrides
+  ansible.builtin.file:
+    path: /etc/systemd/system/certbot.service.d
+    owner: root
+    group: root
+    mode: '0755'
+    state: directory
+
+- name: Override systemd service definition
+  ansible.builtin.template:
+    src: systemd/override.conf.j2
+    dest: /etc/systemd/system/certbot.service.d/override.conf
+    owner: root
+    group: root
+    mode: '0644'
+
+- name: Register service overrides with systemd
+  ansible.builtin.systemd_service:
+    name: certbot
+    daemon_reload: true
+    enabled: true

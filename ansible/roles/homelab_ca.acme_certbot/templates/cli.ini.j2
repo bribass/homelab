@@ -1,0 +1,29 @@
+# Use custom directories
+config-dir = /etc/homelab_ca
+work-dir = /var/lib/homelab_ca
+logs-dir = /var/log/homelab_ca
+
+# Connect to our internal CA
+server = https://certs.h.bbassett.net:8443/acme/directory
+agree-tos = True
+
+# Request certificate for our full domain name
+domains = {{ ansible_fqdn }}
+
+# Use system-specific ACME account for requests
+email = automation-{{ ansible_hostname }}@h.bbassett.net
+
+# Request RSA keys
+key-type -= rsa
+rsa-key-size = 4096
+
+# Use internal web server for challenges
+standalone = True
+preferred-challenges = http
+
+# Adjust interactive output regarding automated renewal
+text = True
+preconfigured-renewal = True
+
+# No need to report usage
+eff-email = False

@@ -1,0 +1,7 @@
+#!/bin/bash
+
+INSTANCE=prod
+CERT_DIR=/etc/homelab_ca/live/{{ ansible_fqdn }}
+
+dsctl ${INSTANCE} tls import-server-key-cert "${CERT_DIR}/fullchain.pem" "${CERT_DIR}/privkey.pem"
+systemctl restart dirsrv@${INSTANCE}

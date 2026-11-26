@@ -20,6 +20,18 @@
       ansible.builtin.import_role:
         name: auth.ldap
 
+    - name: Generate TLS certificate via ACME
+      ansible.builtin.import_role:
+        name: homelab_ca.acme_certbot
+
+    - name: Register deploy hook for Certbot
+      ansible.builtin.template:
+        src: conf/certbot/renewal-hook.sh.j2
+        dest: /etc/homelab_ca/renewal-hooks/deploy/dirsrv.sh
+        owner: root
+        group: root
+        mode: '0755'
+
     - name: Summarize services
       ansible.builtin.import_role:
         name: service.summary
