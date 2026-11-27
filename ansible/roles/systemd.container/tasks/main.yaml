@@ -14,6 +14,15 @@
     group: root
     mode: '0644'
 
+- name: Install '{{ container_name }}' container environment file
+  ansible.builtin.template:
+    src: "conf/systemd/{{ container_name }}.env.j2"
+    dest: "/etc/containers/systemd/{{ container_name }}.env"
+    owner: root
+    group: root
+    mode: '0600'
+  when: (playbook_dir + '/conf/systemd/' + container_name + '.env.j2') is file
+
 - name: Register container with systemd
   ansible.builtin.systemd_service:
     name: "{{ container_name }}"

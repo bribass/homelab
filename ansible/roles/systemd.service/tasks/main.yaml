@@ -6,6 +6,15 @@
     group: root
     mode: '0644'
 
+- name: Install service environment file
+  ansible.builtin.template:
+    src: "conf/systemd/{{ service_name }}.env.j2"
+    dest: "/etc/containers/systemd/{{ service_name }}.env"
+    owner: root
+    group: root
+    mode: '0600'
+  when: (playbook_dir + '/conf/systemd/' + service_name + '.env.j2') is file
+
 - name: Register service with systemd
   ansible.builtin.systemd_service:
     name: "{{ service_name }}"
